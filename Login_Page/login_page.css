@@ -1,0 +1,98 @@
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f6f2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Container {
+  width: 85vw;
+  height: 85vh;
+  max-width: 1200px;
+  min-height: 500px;
+  display: flex;
+}
+
+.Left {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2vh;
+}
+
+.Left h2 {
+  font-size: 3vw;
+  font-weight: 600;
+  color: #000;
+}
+
+.Left button {
+  align-self: flex-start;
+  padding: 1.2vh 2.5vw;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #f6a5ae, #f7b2b7);
+  color: #ffffff;
+  font-size: 1.1vw;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgba(247, 178, 183, 0.5);
+  transition: all 0.3s ease;
+}
+.Left button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(247, 178, 183, 0.65);
+}
+
+.Right {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3vh;
+}
+
+.Right button {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  min-height: 10vw;
+  max-width: 100%;
+}
+
+.Student_bt,
+.Faculty_bt {
+  background-color: #ffffff;
+  padding: 3vh 3vw;
+  border-radius: 16px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.Student_bt:hover,
+.Faculty_bt:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.Student h6,
+.Faculty h6 {
+  font-size: 1.2vw;
+  margin-bottom: 1vh;
+  color: #302f2f;
+  font-weight: 600;
+}
+
+.Student p,
+.Faculty p {
+  font-size: 1vw;
+  color: #666;
+  line-height: 1.5;
+}

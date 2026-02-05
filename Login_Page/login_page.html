@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="login_page.css">
+</head>
+<body>
+  <div class="Container">
+    <div class="Left">
+      <h2> Who Are You ?</h2>
+      <button class="role_bt">Choose Role </button>
+    </div>
+    <div class="Right">
+      <button class="Student_bt" onclick="student_login()">
+        <div class="Student">
+          <h6> Student</h6>
+          <p> Track your marks and attendance . Your academic journey, simplified.</p>
+        </div>
+      </button>
+      <button class="Faculty_bt" onclick="faculty_login()">
+        <div class="Faculty">
+          <h6> Faculty </h6>
+          <p> Mark attendance with a flick of the wrist.</p>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function student_login(){
+      window.location.href="Student_login.html";
+    }
+    function faculty_login(){
+      window.location.href="Faculty_login.html";
+    }
+  </script>
+</body>
+</html>
