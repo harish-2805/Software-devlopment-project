@@ -1,0 +1,9 @@
+# Python cache files (auto-generated)
+__pycache__/
+*.pyc
+
+# Environment variables (database credentials, secret keys)
+.env
+
+# Virtual environment folder (if created later)
+venv/
