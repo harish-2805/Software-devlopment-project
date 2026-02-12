@@ -1,98 +1,125 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Body styles */
 body {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f6f2f2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #333;
+    transition: all 0.3s ease;
 }
 
-.Container {
-  width: 85vw;
-  height: 85vh;
-  max-width: 1200px;
-  min-height: 500px;
-  display: flex;
+/* Container styling */
+#container {
+    width: 90%;
+    max-width: 400px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.Left {
-  width: 40%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2vh;
+/* Hover effect on container */
+#container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
 }
 
-.Left h2 {
-  font-size: 3vw;
-  font-weight: 600;
-  color: #000;
+/* Heading */
+#container h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.8rem;
 }
 
-.Left button {
-  align-self: flex-start;
-  padding: 1.2vh 2.5vw;
-  border-radius: 30px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(135deg, #f6a5ae, #f7b2b7);
-  color: #ffffff;
-  font-size: 1.1vw;
-  font-weight: 500;
-  box-shadow: 0 8px 20px rgba(247, 178, 183, 0.5);
-  transition: all 0.3s ease;
-}
-.Left button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(247, 178, 183, 0.65);
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
 }
 
-.Right {
-  width: 60%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 3vh;
+/* Input fields and select */
+input[type="text"],
+input[type="password"],
+select {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
-.Right button {
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  min-height: 10vw;
-  max-width: 100%;
+/* Input focus effect */
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus {
+    border-color: #2575fc;
+    box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
+    outline: none;
 }
 
-.Student_bt,
-.Faculty_bt {
-  background-color: #ffffff;
-  padding: 3vh 3vw;
-  border-radius: 16px;
-
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+/* Labels */
+label {
+    margin-bottom: 0.3rem;
+    font-weight: 500;
 }
 
-.Student_bt:hover,
-.Faculty_bt:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+/* Button styling */
+button {
+    padding: 0.8rem;
+    background: #2575fc;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.Student h6,
-.Faculty h6 {
-  font-size: 1.2vw;
-  margin-bottom: 1vh;
-  color: #302f2f;
-  font-weight: 600;
+/* Button hover */
+button:hover {
+    background: #6a11cb;
+    transform: translateY(-2px);
 }
 
-.Student p,
-.Faculty p {
-  font-size: 1vw;
-  color: #666;
-  line-height: 1.5;
+/* Bottom text */
+#container p {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+#container a {
+    color: #2575fc;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+#container a:hover {
+    color: #6a11cb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+    #container {
+        padding: 1.5rem;
+    }
+
+    #container h2 {
+        font-size: 1.5rem;
+    }
 }

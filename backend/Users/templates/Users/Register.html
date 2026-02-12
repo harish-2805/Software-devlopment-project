@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up - WBDDev</title>
+</head>
+<body>
+    <div id="container">
+        <h2>Sign Up</h2>
+        <form action="signup_process.php" method="POST">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div>
+                <label for="role">Role:</label>
+                <select name="role" id="role" required onchange="toggleEmail()">
+                    <option value="">Select Role</option>
+                    <option value="student">Student</option>
+                    <option value="faculty">Faculty</option>
+                </select>
+            </div>
+
+            <div id="emailDiv" hidden>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email">
+            </div>
+
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div>
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+
+            <div>
+                <button type="submit">Sign Up</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function toggleEmail() {
+            var roleSelect = document.getElementById("role");
+            var emailDiv = document.getElementById("emailDiv");
+            var emailInput = document.getElementById("email");
+
+            if (roleSelect.value === "student") {
+                emailDiv.hidden = false;
+                emailInput.required = true;
+            } else {
+                emailDiv.hidden = true;
+                emailInput.required = false;
+            }
+        }
+    </script>
+</body>
+</html>
