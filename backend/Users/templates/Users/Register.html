@@ -1,62 +1,154 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Sign Up - WBDDev</title>
-</head>
-<body>
-    <div id="container">
-        <h2>Sign Up</h2>
-        <form action="signup_process.php" method="POST">
-            <div>
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-
-            <div>
-                <label for="role">Role:</label>
-                <select name="role" id="role" required onchange="toggleEmail()">
-                    <option value="">Select Role</option>
-                    <option value="student">Student</option>
-                    <option value="faculty">Faculty</option>
-                </select>
-            </div>
-
-            <div id="emailDiv" hidden>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email">
-            </div>
-
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-
-            <div>
-                <label for="confirm_password">Confirm Password:</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
-            </div>
-
-            <div>
-                <button type="submit">Sign Up</button>
-            </div>
-        </form>
-    </div>
-
+    <link rel="stylesheet" href="{% static 'users/register.css' %}">
     <script>
-        function toggleEmail() {
-            var roleSelect = document.getElementById("role");
-            var emailDiv = document.getElementById("emailDiv");
-            var emailInput = document.getElementById("email");
+        function toggleFields() {
+            var role = document.getElementById("role").value;
 
-            if (roleSelect.value === "student") {
-                emailDiv.hidden = false;
-                emailInput.required = true;
-            } else {
-                emailDiv.hidden = true;
-                emailInput.required = false;
+            var studentDiv = document.getElementById("student_fields");
+            var facultyDiv = document.getElementById("faculty_fields");
+
+            if (role === "student") {
+                studentDiv.style.display = "block";
+                facultyDiv.style.display = "none";
+            } 
+            else if (role === "faculty") {
+                studentDiv.style.display = "none";
+                facultyDiv.style.display = "block";
+            } 
+            else {
+                studentDiv.style.display = "none";
+                facultyDiv.style.display = "none";
             }
         }
     </script>
+
+</head>
+<body>
+
+<div id="container">
+
+    <h2>Sign Up</h2>
+
+    {% if error %}
+        <p style="color:red">{{ error }}</p>
+    {% endif %}
+
+    <form action="{% url 'register' %}" method="POST">
+        {% csrf_token %}
+
+        <div>
+            <label>Username:</label>
+            <input type="text" name="username" required>
+        </div>
+
+        <div>
+            <label>Role:</label>
+            <select name="role" id="role" onchange="toggleFields()" required>
+                <option value="">Select Role</option>
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Email:</label>
+            <input type="email" name="email">
+        </div>
+
+        <!-- STUDENT SECTION -->
+        <div id="student_fields" style="display:none;">
+
+            <h3>Student Info</h3>
+
+            <div>
+                <label>Roll Number:</label>
+                <input type="text" name="roll_no">
+            </div>
+
+            <div>
+                <label>Year:</label>
+                <select name="year">
+                    <option value="1">First Year</option>
+                    <option value="2">Second Year</option>
+                    <option value="3">Third Year</option>
+                    <option value="4">Fourth Year</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Semester:</label>
+                <select name="semester">
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Department:</label>
+                <select name="student_department">
+                    <option value="">Select Department</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        </div>
+
+        <!-- FACULTY SECTION -->
+        <div id="faculty_fields" style="display:none;">
+
+            <h3>Faculty Info</h3>
+
+            <div>
+                <label>Department:</label>
+                <select name="faculty_department">
+                    <option value="">Select Department</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label>Employee ID:</label>
+                <input type="text" name="emp_id">
+            </div>
+
+        </div>
+
+        <div>
+            <label>Password:</label>
+            <input type="password" name="password" required>
+        </div>
+
+        <div>
+            <label>Confirm Password:</label>
+            <input type="password" name="confirm_password" required>
+        </div>
+
+        <div>
+            <button type="submit">Sign Up</button>
+        </div>
+
+    </form>
+
+    <p>Already have an account?
+        <a href="{% url 'login' %}">Login</a>
+    </p>
+
+</div>
+
 </body>
 </html>

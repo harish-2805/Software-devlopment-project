@@ -1,0 +1,150 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Body styles */
+body {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+/* Container styling */
+#container {
+    width: 90%;
+    max-width: 450px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect on container */
+#container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Heading */
+#container h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.8rem;
+}
+
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Form groups */
+form > div {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+/* Input fields and select */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select {
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 0.3rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+/* Input focus effect */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+select:focus {
+    border-color: #2575fc;
+    box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
+    outline: none;
+}
+
+/* Labels */
+label {
+    font-weight: 500;
+}
+
+/* Section headings for student/faculty */
+#student_fields h3,
+#faculty_fields h3 {
+    margin-bottom: 0.8rem;
+    color: #2575fc;
+    font-size: 1.2rem;
+    border-bottom: 1px solid #2575fc;
+    padding-bottom: 0.2rem;
+}
+
+/* Button styling */
+button {
+    padding: 0.8rem;
+    background: #2575fc;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* Button hover */
+button:hover {
+    background: #6a11cb;
+    transform: translateY(-2px);
+}
+
+/* Error message */
+p[style*="color:red"] {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+/* Bottom text */
+#container p {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+#container a {
+    color: #2575fc;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+#container a:hover {
+    color: #6a11cb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+    #container {
+        padding: 1.5rem;
+    }
+
+    #container h2 {
+        font-size: 1.5rem;
+    }
+}
