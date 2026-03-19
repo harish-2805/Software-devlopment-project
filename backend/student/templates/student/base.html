@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Portal</title>
+    <link rel="stylesheet" href="{% static 'student/dashboard.css' %}">
+</head>
+<body>
+
+<!-- ===== TOPBAR ===== -->
+<div class="topbar">
+    <div>
+        <h2>Student Portal</h2>
+    </div>
+
+    <div>
+        👤 {{ request.user.username }}
+        {% comment %}
+<a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+{% endcomment %}
+
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- ===== SIDEBAR ===== -->
+    <div class="sidebar">
+        
+        <ul>
+            <li><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+            <li><a href="#">Academics</a></li>
+            <li><a href="#">Messaging</a></li>
+            <li><a href="#">Attendance</a></li>
+            <li><a href="#">Alumni</a></li>
+        </ul>
+    </div>
+
+    <!-- ===== MAIN CONTENT AREA ===== -->
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends 'student/base.html' %}
+
+{% block content %}
+
+<h3>Welcome, {{ student.user.first_name }} {{ student.user.last_name }}</h3>
+
+<div class="card">
+    <h4>Profile Information</h4>
+    <p><strong>Username:</strong> {{ student.user.username }}</p>
+    <p><strong>Email:</strong> {{ student.user.email }}</p>
+    <p><strong>Department:</strong> {{ student.department.name }}</p>
+    <p><strong>Year:</strong> {{ student.year }}</p>
+    <p><strong>Rank:</strong> {{ rank }}</p>
+</div>
+
+<div class="card">
+    <h4>Academic Summary</h4>
+    <p><strong>Total Marks:</strong> {{ total_marks }}</p>
+    <p><strong>Attendance:</strong> {{ attendance_percentage }}%</p>
+</div>
+
+<div class="card">
+    <h4>Alumni Section</h4>
+    <p>This section will display alumni details later.</p>
+    <p><em>Coming Soon...</em></p>
+</div>
+
+{% endblock %}

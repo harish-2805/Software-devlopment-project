@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from .models import User, Student, Faculty, Department
-
+from academics.models import Subject, Enrollment
 
 def register_view(request):
 
@@ -89,13 +89,28 @@ def register_view(request):
 
         #  Create one to one student or facluty based on role...
         if role == 'student':
-            Student.objects.create(
+
+            student = Student.objects.create(
                 user=user,
                 roll_no=roll_no,
                 year=year,
                 semester=semester,
                 department=department
             )
+
+            # Get subjects for that department + semester
+            subjects = Subject.objects.filter(
+                department=department,
+                semester=semester
+            )
+
+            # Auto enroll student into those subjects
+            for subject in subjects:
+                Enrollment.objects.create(
+                    student=student,
+                    subject=subject
+                )
+
 
         elif role == 'faculty':
             Faculty.objects.create(
