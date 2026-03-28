@@ -75,10 +75,6 @@ def register_view(request):
                 semester=semester,
                 department=department
             )
-            # Auto-enroll into subjects for their dept + semester
-            subjects = Subject.objects.filter(department=department, semester=semester)
-            for subject in subjects:
-                Enrollment.objects.get_or_create(student=student, subject=subject)
 
         elif role == 'faculty':
             Faculty.objects.create(user=user, department=department, emp_id=emp_id)

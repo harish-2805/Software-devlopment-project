@@ -1,0 +1,107 @@
+{% extends 'student/base.html' %}
+{% load static %}
+{% block title %}Messages{% endblock %}
+{% block nav_messages %}active{% endblock %}
+
+{% block content %}
+<style>
+.msg-container { max-width:900px; margin:0 auto; padding:1.5rem; }
+.page-header { margin-bottom:24px; }
+.page-header h2 { font-size:22px; font-weight:700; color:#0f172a; }
+.page-header p  { color:#64748b; font-size:14px; margin-top:4px; }
+.compose-card { background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid #e2e8f0; margin-bottom:24px; }
+.compose-title { font-size:16px; font-weight:700; color:#0f172a; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #f1f5f9; }
+.form-group { margin-bottom:14px; }
+.form-label { font-size:13px; font-weight:600; color:#475569; margin-bottom:6px; display:block; }
+.form-control { width:100%; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:14px; font-family:inherit; transition:border-color .2s; }
+.form-control:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.1); }
+.btn-send { background:#6366f1; color:#fff; border:none; padding:11px 24px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; transition:background .2s; }
+.btn-send:hover { background:#4f46e5; }
+.msgs-section { margin-top:8px; }
+.msgs-title { font-size:16px; font-weight:700; color:#0f172a; margin-bottom:14px; }
+.msg-card { background:#fff; border-radius:14px; padding:18px 20px; box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid #e2e8f0; margin-bottom:12px; border-left:4px solid #6366f1; }
+.msg-card.replied { border-left-color:#10b981; }
+.msg-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; flex-wrap:wrap; gap:8px; }
+.msg-subject { font-weight:700; font-size:15px; color:#0f172a; }
+.msg-meta    { font-size:12px; color:#94a3b8; margin-top:2px; }
+.msg-status  { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.status-pending  { background:#dbeafe; color:#1d4ed8; }
+.status-replied  { background:#dcfce7; color:#15803d; }
+.msg-body { font-size:14px; color:#334155; line-height:1.6; background:#f8fafc; border-radius:8px; padding:10px 12px; margin-bottom:10px; }
+.reply-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; font-size:14px; color:#166534; line-height:1.6; }
+.reply-label { font-size:12px; font-weight:700; color:#15803d; margin-bottom:4px; }
+.empty-msgs { text-align:center; padding:48px; background:#fff; border-radius:14px; color:#94a3b8; }
+</style>
+
+<div class="msg-container">
+    <div class="page-header">
+        <h2>✉️ Messages</h2>
+        <p>Send doubts or questions to your faculty</p>
+    </div>
+
+    <!-- Compose -->
+    <div class="compose-card">
+        <div class="compose-title">📝 Send a New Message</div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Select Faculty</label>
+                <select name="faculty_id" class="form-control" required>
+                    <option value="">-- Choose faculty --</option>
+                    {% for f in faculty_list %}
+                    <option value="{{ f.id }}">
+                        {{ f.user.get_full_name|default:f.user.username }} · {{ f.department.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Subject</label>
+                <input type="text" name="subject" class="form-control" placeholder="e.g. Doubt about Unit 3 topic" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea name="body" class="form-control" rows="4" placeholder="Type your message here..." required></textarea>
+            </div>
+            <button type="submit" class="btn-send">📤 Send Message</button>
+        </form>
+    </div>
+
+    <!-- Sent Messages -->
+    <div class="msgs-section">
+        <div class="msgs-title">📬 Your Sent Messages</div>
+        {% if sent_messages %}
+            {% for msg in sent_messages %}
+            <div class="msg-card {% if msg.reply %}replied{% endif %}">
+                <div class="msg-header">
+                    <div>
+                        <div class="msg-subject">{{ msg.subject }}</div>
+                        <div class="msg-meta">
+                            To: <strong>{{ msg.receiver.user.get_full_name|default:msg.receiver.user.username }}</strong>
+                            ({{ msg.receiver.department.name }}) · {{ msg.timestamp|date:"d M Y, g:i A" }}
+                        </div>
+                    </div>
+                    {% if msg.reply %}
+                        <span class="msg-status status-replied">✓ Replied</span>
+                    {% else %}
+                        <span class="msg-status status-pending">⏳ Pending</span>
+                    {% endif %}
+                </div>
+                <div class="msg-body">{{ msg.body }}</div>
+                {% if msg.reply %}
+                <div class="reply-box">
+                    <div class="reply-label">Faculty Reply:</div>
+                    {{ msg.reply }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-msgs">
+                <div style="font-size:42px;margin-bottom:10px;">📭</div>
+                <p>No messages sent yet. Ask your faculty anything above!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

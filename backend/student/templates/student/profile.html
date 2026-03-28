@@ -1,0 +1,84 @@
+{% extends 'student/base.html' %}
+{% load static %}
+{% block title %}My Profile{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block content %}
+<style>
+.profile-container { max-width:900px; margin:0 auto; padding:1.5rem; }
+.profile-hero { background:linear-gradient(135deg,#6366f1 0%,#4f46e5 100%); border-radius:20px; padding:28px 32px; color:#fff; margin-bottom:24px; display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.profile-avatar { width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,.25); font-size:32px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:3px solid rgba(255,255,255,.4); }
+.profile-hero-name  { font-size:22px; font-weight:800; margin-bottom:4px; }
+.profile-hero-sub   { font-size:13px; opacity:.85; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.card  { background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid #e2e8f0; }
+.card-title { font-size:15px; font-weight:700; color:#0f172a; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #f1f5f9; }
+.info-row { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border-radius:10px; margin-bottom:8px; }
+.info-row:last-child { margin-bottom:0; }
+.info-key { font-size:13px; color:#64748b; font-weight:500; }
+.info-val { font-size:14px; font-weight:600; color:#0f172a; }
+.form-group   { margin-bottom:14px; }
+.form-label   { font-size:13px; font-weight:600; color:#475569; margin-bottom:6px; display:block; }
+.form-control { width:100%; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:14px; font-family:inherit; transition:border-color .2s; }
+.form-control:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.1); }
+.form-control:disabled { background:#f8fafc; color:#94a3b8; cursor:not-allowed; }
+.btn-save { background:#6366f1; color:#fff; border:none; padding:11px 24px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; width:100%; transition:background .2s; }
+.btn-save:hover { background:#4f46e5; }
+.note-box { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 14px; font-size:13px; color:#1d4ed8; margin-bottom:16px; }
+@media(max-width:700px) { .grid2 { grid-template-columns:1fr; } }
+</style>
+
+<div class="profile-container">
+    <!-- Hero -->
+    <div class="profile-hero">
+        <div class="profile-avatar">{{ student.user.username|first|upper }}</div>
+        <div>
+            <div class="profile-hero-name">{{ student.user.get_full_name|default:student.user.username }}</div>
+            <div class="profile-hero-sub">Roll No: {{ student.roll_no }} · {{ student.department.name }}</div>
+            <div class="profile-hero-sub">Year {{ student.year }} · Semester {{ student.semester }}</div>
+        </div>
+    </div>
+
+    <div class="grid2">
+        <!-- Student Details (read-only) -->
+        <div class="card">
+            <div class="card-title">🎓 Academic Details</div>
+            <div class="info-row"><span class="info-key">Username</span><span class="info-val">{{ student.user.username }}</span></div>
+            <div class="info-row"><span class="info-key">Roll Number</span><span class="info-val">{{ student.roll_no }}</span></div>
+            <div class="info-row"><span class="info-key">Department</span><span class="info-val">{{ student.department.name }}</span></div>
+            <div class="info-row"><span class="info-key">Year</span><span class="info-val">{{ student.get_year_display }}</span></div>
+            <div class="info-row"><span class="info-key">Semester</span><span class="info-val">{{ student.get_semester_display }}</span></div>
+            <div class="info-row"><span class="info-key">Email</span><span class="info-val">{{ student.user.email|default:"Not set" }}</span></div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="card">
+            <div class="card-title">✏️ Edit Profile</div>
+            <div class="note-box">ℹ️ Roll number, department, year and semester can only be changed by admin.</div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-control"
+                           value="{{ student.user.first_name }}" placeholder="Enter first name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-control"
+                           value="{{ student.user.last_name }}" placeholder="Enter last name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control"
+                           value="{{ student.user.email }}" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username (cannot change)</label>
+                    <input type="text" class="form-control" value="{{ student.user.username }}" disabled>
+                </div>
+                <button type="submit" class="btn-save">💾 Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

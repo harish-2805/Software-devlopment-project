@@ -1,0 +1,117 @@
+{% extends 'faculty/base.html' %}
+{% block title %}Attendance Management{% endblock %}
+{% block nav_attendance %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📋 Attendance Management</h2>
+    <p class="page-sub">Select a subject to view and update student attendance</p>
+</div>
+
+<!-- Subject Selector -->
+<div class="select-card">
+    <div style="flex:1;min-width:220px;">
+        <label class="form-label">Select Subject</label>
+        <select class="form-control" id="subjectSelect" onchange="if(this.value) window.location='/faculty/attendance/?subject_id='+this.value;">
+            <option value="">-- Choose a subject --</option>
+            {% for subj in subjects %}
+                <option value="{{ subj.id }}" {% if selected_subject.id == subj.id %}selected{% endif %}>
+                    {{ subj.name }} ({{ subj.code }}) · Sem {{ subj.semester }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+{% if selected_subject %}
+<div class="card">
+    <div class="card-title">
+        {{ selected_subject.name }} ({{ selected_subject.code }}) — Attendance Sheet
+        <span style="float:right;font-size:12px;color:#64748b;font-weight:400;">Semester {{ selected_subject.semester }} · Year {{ selected_subject.year }}</span>
+    </div>
+
+    {% if students_data %}
+    <form method="post" action="/faculty/attendance/?subject_id={{ selected_subject.id }}">
+        {% csrf_token %}
+        <input type="hidden" name="subject_id" value="{{ selected_subject.id }}">
+        <input type="hidden" name="save_attendance" value="1">
+
+        <!-- Quick fill row -->
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;padding:12px;background:#f8fafc;border-radius:10px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:600;color:#475569;">Quick Fill Total Classes:</span>
+            <input type="number" id="quickTotal" min="0" class="form-control form-control-sm" style="width:100px;" placeholder="e.g. 40">
+            <button type="button" class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;" onclick="fillAll()">Apply to All</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>Classes Attended</th>
+                        <th>Total Classes</th>
+                        <th>Attendance %</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in students_data %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ row.student.roll_no }}</strong></td>
+                        <td>{{ row.student.user.get_full_name|default:row.student.user.username }}</td>
+                        <td>
+                            <input type="number" name="attended_{{ row.student.id }}"
+                                   value="{{ row.attended }}" min="0"
+                                   class="form-control form-control-sm attended-input"
+                                   data-student="{{ row.student.id }}" style="width:90px;">
+                        </td>
+                        <td>
+                            <input type="number" name="total_{{ row.student.id }}"
+                                   value="{{ row.total }}" min="0"
+                                   class="form-control form-control-sm total-input"
+                                   data-student="{{ row.student.id }}" style="width:90px;">
+                        </td>
+                        <td>
+                            <span id="pct_{{ row.student.id }}" class="badge {% if row.pct >= 80 %}badge-green{% elif row.pct >= 60 %}badge-yellow{% else %}badge-red{% endif %}">
+                                {{ row.pct }}%
+                            </span>
+                        </td>
+                        <td>
+                            {% if row.pct >= 75 %}
+                                <span class="badge badge-green">✓ Safe</span>
+                            {% elif row.pct >= 60 %}
+                                <span class="badge badge-yellow">⚠ Warning</span>
+                            {% else %}
+                                <span class="badge badge-red">✗ Low</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top:20px;">
+            <button type="submit" class="btn btn-success">💾 Save Attendance</button>
+        </div>
+    </form>
+    {% else %}
+        <div class="no-data">
+            <div class="no-icon">👥</div>
+            <p>No students enrolled in this subject yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+function fillAll() {
+    const total = document.getElementById('quickTotal').value;
+    if (!total) return;
+    document.querySelectorAll('.total-input').forEach(inp => inp.value = total);
+}
+</script>
+{% endblock %}

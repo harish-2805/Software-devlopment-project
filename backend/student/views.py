@@ -222,3 +222,18 @@ def alumni(request):
         'dept_alumni':   dept_alumni,
         'other_alumni':  other_alumni,
     })
+
+@login_required
+def student_profile(request):
+    if request.user.role != 'student':
+        return redirect('login')
+    student = request.user.student
+    user    = request.user
+    if request.method == 'POST':
+        user.first_name = request.POST.get('first_name', '').strip()
+        user.last_name  = request.POST.get('last_name', '').strip()
+        user.email      = request.POST.get('email', '').strip()
+        user.save()
+        django_messages.success(request, 'Profile updated successfully!')
+        return redirect('student_profile')
+    return render(request, 'student/profile.html', {'student': student})

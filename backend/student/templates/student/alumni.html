@@ -1,0 +1,115 @@
+{% extends 'student/base.html' %}
+{% load static %}
+{% block title %}Alumni{% endblock %}
+{% block nav_alumni %}active{% endblock %}
+
+{% block content %}
+<style>
+.alumni-container { max-width:1200px; margin:0 auto; padding:1.5rem; }
+.alumni-hero { background:linear-gradient(135deg,#7c3aed 0%,#2563eb 100%); border-radius:20px; padding:32px; color:#fff; margin-bottom:28px; }
+.alumni-hero h1 { font-size:26px; font-weight:800; margin-bottom:6px; }
+.alumni-hero p  { font-size:14px; opacity:.85; }
+.section-title { font-size:17px; font-weight:700; color:#0f172a; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid #e2e8f0; }
+.alumni-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-bottom:28px; }
+.alumni-card { background:#fff; border-radius:16px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid #e2e8f0; transition:all .25s; display:flex; flex-direction:column; gap:10px; }
+.alumni-card:hover { transform:translateY(-4px); box-shadow:0 10px 25px rgba(0,0,0,.1); border-color:#a5b4fc; }
+.alumni-top { display:flex; align-items:center; gap:12px; }
+.alumni-avatar { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#2563eb); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.alumni-name { font-weight:700; font-size:15px; color:#0f172a; }
+.alumni-batch { font-size:12px; color:#64748b; margin-top:2px; }
+.alumni-dept  { display:inline-block; padding:3px 10px; background:#ede9fe; color:#7c3aed; border-radius:20px; font-size:12px; font-weight:600; }
+.alumni-info  { display:flex; flex-direction:column; gap:5px; }
+.alumni-info-row { display:flex; align-items:center; gap:8px; font-size:13px; color:#475569; }
+.alumni-info-row .icon { font-size:15px; }
+.alumni-linkedin { display:inline-flex; align-items:center; gap:6px; background:#0a66c2; color:#fff; padding:7px 16px; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; transition:background .2s; margin-top:4px; }
+.alumni-linkedin:hover { background:#004182; }
+.no-linkedin { font-size:12px; color:#94a3b8; font-style:italic; }
+.empty-state { text-align:center; padding:48px; background:#fff; border-radius:16px; color:#94a3b8; }
+</style>
+
+<div class="alumni-container">
+    <div class="alumni-hero">
+        <div style="font-size:13px;opacity:.8;margin-bottom:8px;">🎓 Alumni Network</div>
+        <h1>Connect with Our Alumni</h1>
+        <p>Learn from their journeys and reach out on LinkedIn to expand your professional network</p>
+    </div>
+
+    <!-- Department Alumni -->
+    {% if dept_alumni %}
+    <div class="section-title">⭐ {{ student.department.name }} Alumni</div>
+    <div class="alumni-grid">
+        {% for alum in dept_alumni %}
+        <div class="alumni-card">
+            <div class="alumni-top">
+                <div class="alumni-avatar">{{ alum.name|first|upper }}</div>
+                <div>
+                    <div class="alumni-name">{{ alum.name }}</div>
+                    <div class="alumni-batch">Batch of {{ alum.batch_year }}</div>
+                </div>
+            </div>
+            <span class="alumni-dept">{{ alum.department.name }}</span>
+            <div class="alumni-info">
+                {% if alum.company %}
+                <div class="alumni-info-row"><span class="icon">🏢</span> {{ alum.company }}</div>
+                {% endif %}
+                {% if alum.designation %}
+                <div class="alumni-info-row"><span class="icon">💼</span> {{ alum.designation }}</div>
+                {% endif %}
+            </div>
+            {% if alum.linkedin_url %}
+                <a href="{{ alum.linkedin_url }}" target="_blank" class="alumni-linkedin">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    Connect on LinkedIn
+                </a>
+            {% else %}
+                <div class="no-linkedin">LinkedIn not available</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Other Department Alumni -->
+    {% if other_alumni %}
+    <div class="section-title">🌐 Other Departments</div>
+    <div class="alumni-grid">
+        {% for alum in other_alumni %}
+        <div class="alumni-card" style="border-left:4px solid #e2e8f0;">
+            <div class="alumni-top">
+                <div class="alumni-avatar" style="background:linear-gradient(135deg,#0ea5e9,#10b981);">{{ alum.name|first|upper }}</div>
+                <div>
+                    <div class="alumni-name">{{ alum.name }}</div>
+                    <div class="alumni-batch">Batch of {{ alum.batch_year }}</div>
+                </div>
+            </div>
+            <span class="alumni-dept" style="background:#e0f2fe;color:#0369a1;">{{ alum.department.name }}</span>
+            <div class="alumni-info">
+                {% if alum.company %}
+                <div class="alumni-info-row"><span class="icon">🏢</span> {{ alum.company }}</div>
+                {% endif %}
+                {% if alum.designation %}
+                <div class="alumni-info-row"><span class="icon">💼</span> {{ alum.designation }}</div>
+                {% endif %}
+            </div>
+            {% if alum.linkedin_url %}
+                <a href="{{ alum.linkedin_url }}" target="_blank" class="alumni-linkedin">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    Connect on LinkedIn
+                </a>
+            {% else %}
+                <div class="no-linkedin">LinkedIn not available</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not dept_alumni and not other_alumni %}
+    <div class="empty-state">
+        <div style="font-size:48px;margin-bottom:12px;">🎓</div>
+        <h3 style="color:#0f172a;margin-bottom:6px;">No Alumni Records Yet</h3>
+        <p>Alumni data will be added by the admin soon. Check back later!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

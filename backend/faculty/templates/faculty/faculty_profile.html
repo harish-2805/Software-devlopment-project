@@ -1,0 +1,87 @@
+{% extends 'faculty/base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>👤 My Profile</h2>
+    <p class="page-sub">View and update your personal information</p>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;">
+
+    <!-- Info Card -->
+    <div class="card">
+        <div class="card-title">Account Information</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            {% for label, value in info_items %}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-radius:10px;">
+                <span style="font-size:13px;color:#64748b;font-weight:500;">{{ label }}</span>
+                <span style="font-size:14px;font-weight:600;color:#0f172a;">{{ value }}</span>
+            </div>
+            {% empty %}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-radius:10px;">
+                <span style="font-size:13px;color:#64748b;font-weight:500;">Username</span>
+                <span style="font-size:14px;font-weight:600;">{{ faculty.user.username }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-radius:10px;">
+                <span style="font-size:13px;color:#64748b;font-weight:500;">Employee ID</span>
+                <span style="font-size:14px;font-weight:600;">{{ faculty.emp_id }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-radius:10px;">
+                <span style="font-size:13px;color:#64748b;font-weight:500;">Department</span>
+                <span style="font-size:14px;font-weight:600;">{{ faculty.department.name }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8fafc;border-radius:10px;">
+                <span style="font-size:13px;color:#64748b;font-weight:500;">Email</span>
+                <span style="font-size:14px;font-weight:600;">{{ faculty.user.email|default:"Not set" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="card">
+        <div class="card-title">Edit Profile</div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">First Name</label>
+                <input type="text" name="first_name" class="form-control"
+                       value="{{ faculty.user.first_name }}" placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Last Name</label>
+                <input type="text" name="last_name" class="form-control"
+                       value="{{ faculty.user.last_name }}" placeholder="Enter last name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control"
+                       value="{{ faculty.user.email }}" placeholder="your@email.com">
+            </div>
+            <div style="background:#f0f9ff;border-radius:8px;padding:10px 14px;font-size:13px;color:#0369a1;margin-bottom:16px;">
+                ℹ️ Username, Employee ID and Department can only be changed by admin.
+            </div>
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        </form>
+    </div>
+
+</div>
+
+<!-- Avatar & Stats -->
+<div class="card" style="margin-top:0;">
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+        <div style="width:80px;height:80px;border-radius:50%;background:#6366f1;color:#fff;font-size:32px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            {{ faculty.user.username|first|upper }}
+        </div>
+        <div>
+            <div style="font-size:20px;font-weight:700;color:#0f172a;">
+                {{ faculty.user.get_full_name|default:faculty.user.username }}
+            </div>
+            <div style="color:#64748b;font-size:14px;margin-top:4px;">{{ faculty.department.name }} · Emp ID: {{ faculty.emp_id }}</div>
+            <div style="color:#64748b;font-size:13px;margin-top:2px;">{{ faculty.user.email|default:"No email set" }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

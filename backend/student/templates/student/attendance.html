@@ -1,0 +1,137 @@
+{% extends 'student/base.html' %}
+{% load static %}
+{% block title %}Attendance{% endblock %}
+{% block nav_attendance %}active{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'student/academics.css' %}">
+<style>
+.att-container { max-width:1100px; margin:0 auto; padding:1.5rem; }
+.att-hero { background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%); border-radius:20px; padding:28px 32px; color:#fff; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+.att-hero h1 { font-size:24px; font-weight:800; margin-bottom:6px; }
+.att-hero p  { font-size:14px; opacity:.85; }
+.overall-ring { text-align:center; }
+.overall-pct  { font-size:48px; font-weight:900; line-height:1; }
+.overall-label{ font-size:13px; opacity:.8; margin-top:4px; }
+.att-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:24px; }
+.att-card  { background:#fff; border-radius:16px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid #e2e8f0; }
+.att-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.att-subj  { font-weight:700; font-size:15px; color:#0f172a; }
+.att-code  { font-size:12px; color:#64748b; margin-top:2px; }
+.att-pct-badge { font-size:22px; font-weight:800; }
+.pct-safe   { color:#10b981; }
+.pct-warn   { color:#f59e0b; }
+.pct-danger { color:#ef4444; }
+.att-bar-bg { height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden; margin-bottom:10px; }
+.att-bar-fill { height:100%; border-radius:4px; transition:width .5s; }
+.bar-safe   { background:linear-gradient(90deg,#10b981,#34d399); }
+.bar-warn   { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+.bar-danger { background:linear-gradient(90deg,#ef4444,#f87171); }
+.att-stats  { display:flex; justify-content:space-between; font-size:12px; color:#64748b; }
+.att-status-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-safe   { background:#dcfce7; color:#15803d; }
+.badge-warn   { background:#fef9c3; color:#92400e; }
+.badge-danger { background:#fee2e2; color:#dc2626; }
+.chart-card { background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid #e2e8f0; }
+.chart-card h3 { font-size:16px; font-weight:700; color:#0f172a; margin-bottom:16px; }
+</style>
+
+<div class="att-container">
+    <div class="att-hero">
+        <div>
+            <div style="font-size:13px;opacity:.8;margin-bottom:6px;">📋 Attendance Overview</div>
+            <h1>Subject-wise Attendance</h1>
+            <p>{{ student.department.name }} · Semester {{ student.semester }}</p>
+        </div>
+        <div class="overall-ring">
+            <div class="overall-pct {% if overall >= 75 %}pct-safe{% elif overall >= 60 %}pct-warn{% else %}pct-danger{% endif %}" style="color:#fff;">
+                {{ overall }}%
+            </div>
+            <div class="overall-label">Overall Attendance</div>
+            {% if overall >= 75 %}
+                <div style="margin-top:8px;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;font-size:12px;">✅ Good Standing</div>
+            {% elif overall >= 60 %}
+                <div style="margin-top:8px;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;font-size:12px;">⚠️ Needs Improvement</div>
+            {% else %}
+                <div style="margin-top:8px;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;font-size:12px;">🚨 Critical — Below 60%</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if attendance_data %}
+    <div class="att-cards">
+        {% for a in attendance_data %}
+        <div class="att-card">
+            <div class="att-card-top">
+                <div>
+                    <div class="att-subj">{{ a.subject }}</div>
+                    <div class="att-code">{{ a.code }}</div>
+                </div>
+                <div class="att-pct-badge {% if a.status == 'safe' %}pct-safe{% elif a.status == 'warning' %}pct-warn{% else %}pct-danger{% endif %}">
+                    {{ a.percentage }}%
+                </div>
+            </div>
+            <div class="att-bar-bg">
+                <div class="att-bar-fill bar-{{ a.status }}" style="width:{{ a.percentage }}%;"></div>
+            </div>
+            <div class="att-stats">
+                <span>{{ a.attended }} / {{ a.total }} classes</span>
+                <span class="att-status-badge badge-{{ a.status }}">
+                    {% if a.status == 'safe' %}✓ Safe{% elif a.status == 'warning' %}⚠ Warning{% else %}✗ Low{% endif %}
+                </span>
+            </div>
+            {% if a.percentage < 75 %}
+            <div style="margin-top:10px;font-size:12px;color:#ef4444;background:#fff1f2;padding:8px 10px;border-radius:8px;">
+                Need {{ a.total|add:"0" }} total — attend more classes to reach 75%
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="chart-card">
+        <h3>📊 Attendance Comparison Chart</h3>
+        <canvas id="attChart" height="80"></canvas>
+    </div>
+
+    <script>
+    const ctx = document.getElementById('attChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [
+                {
+                    label: 'Attended',
+                    data: {{ chart_attended|safe }},
+                    backgroundColor: '#6366f1',
+                    borderRadius: 6,
+                },
+                {
+                    label: 'Total Classes',
+                    data: {{ chart_total|safe }},
+                    backgroundColor: '#e2e8f0',
+                    borderRadius: 6,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position:'top' } },
+            scales: {
+                y: { beginAtZero:true, grid:{ color:'#f1f5f9' } },
+                x: { grid:{ display:false } }
+            }
+        }
+    });
+    </script>
+
+    {% else %}
+    <div style="text-align:center;padding:60px;background:#fff;border-radius:16px;">
+        <div style="font-size:48px;margin-bottom:12px;">📋</div>
+        <h3 style="color:#0f172a;margin-bottom:8px;">No Attendance Data</h3>
+        <p style="color:#64748b;">Your attendance hasn't been recorded yet. Check back later.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
