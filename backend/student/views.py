@@ -82,18 +82,29 @@ def academics(request):
     subjects_data = []
     for m in marks_qs:
         subjects_data.append({
-            'subject':      m.subject.name,
-            'code':         m.subject.code,
-            'credits':      m.subject.credits,
-            'minor1':       m.minor1,
-            'midsem':       m.midsem,
-            'minor2':       m.minor2,
-            'cam':          m.cam,
-            'ese':          m.ese,
-            'total':        m.total or 0,
-            'grade':        m.grade or '-',
-            'grade_points': m.grade_points or 0,
-        })
+        'subject':      m.subject.name,
+        'code':         m.subject.code,
+        'credits':      m.subject.credits,
+
+        'minor1':       m.minor1,
+        'midsem':       m.midsem,
+        'minor2':       m.minor2,
+        'cam':          m.cam,
+        'ese':          m.ese,
+
+        'total':        m.total or 0,
+        'running_score': m.running_score,
+
+        # FINAL grade (after ESE)
+        'grade':        m.grade or '-',
+        'grade_points': m.grade_points or 0,
+
+        # ⭐ NEW FEATURES
+        'predicted_grade': m.predicted_grade or '-',
+        'marks_needed':    m.marks_needed_for_next_grade or '-',
+        'rank':            m.current_rank or '-',
+        'is_at_risk':      m.is_at_risk,
+    })
 
     sgpa = calculate_sgpa(student, semester)
     cgpa = calculate_cgpa(student, semester)

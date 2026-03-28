@@ -364,20 +364,25 @@ def calculate_cgpa(student, up_to_semester):
 # ─────────────────────────────────────────────
 # MARKS MODEL (ENHANCED — LIVE RELATIVE SYSTEM)
 # ─────────────────────────────────────────────
-
 class Marks(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
 
-# CAM components (total CAM = 50)
-    minor1 = models.IntegerField(default=0,
-        validators=[MinValueValidator(0), MaxValueValidator(10)])
+    # CAM components (total CAM = 50)
+    minor1 = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(10)]
+    )
 
-    midsem = models.IntegerField(default=0,
-        validators=[MinValueValidator(0), MaxValueValidator(30)])
+    midsem = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(30)]
+    )
 
-    minor2 = models.IntegerField(default=0,
-        validators=[MinValueValidator(0), MaxValueValidator(10)])
+    minor2 = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(10)]
+    )
 
     # ESE (may not be conducted yet)
     ese = models.IntegerField(
@@ -426,19 +431,61 @@ class Marks(models.Model):
         if std_dev == 0:
             return "P"
 
-        if   t >= mean + 2*std_dev: return "EX"
-        elif t >= mean + 1.5*std_dev: return "A"
-        elif t >= mean + 1*std_dev: return "B"
-        elif t >= mean + 0.5*std_dev: return "C"
+        if   t >= mean + 2 * std_dev: return "EX"
+        elif t >= mean + 1.5 * std_dev: return "A"
+        elif t >= mean + 1 * std_dev: return "B"
+        elif t >= mean + 0.5 * std_dev: return "C"
         elif t >= mean: return "D"
         else: return "P"
+
+    # ───────── MARKS NEEDED FOR NEXT GRADE (NEW FEATURE) ─────────
+
+    @property
+    def marks_needed_for_next_grade(self):
+        """
+        Shows additional marks needed to reach next higher grade.
+        Works dynamically with relative grading.
+        """
+
+        all_marks = Marks.objects.filter(subject=self.subject)
+        scores = [m.running_score for m in all_marks]
+
+        if len(scores) <= 1:
+            return None
+
+        mean = sum(scores) / len(scores)
+        variance = sum((s - mean) ** 2 for s in scores) / len(scores)
+        std_dev = math.sqrt(variance)
+
+        current = self.running_score
+
+        # Grade boundaries (LOW → HIGH)
+        boundaries = [
+            ("D",  mean),
+            ("C",  mean + 0.5 * std_dev),
+            ("B",  mean + 1 * std_dev),
+            ("A",  mean + 1.5 * std_dev),
+            ("EX", mean + 2 * std_dev),
+        ]
+
+        for grade, boundary in boundaries:
+            if current < boundary:
+                needed = math.ceil(boundary - current)
+                return f"+{needed} marks for {grade}"
+
+        # Already highest
+        return "Highest Grade (EX)"
 
     # ───────── CLASS RANK ─────────
 
     @property
     def current_rank(self):
         all_marks = Marks.objects.filter(subject=self.subject)
-        ordered = sorted(all_marks, key=lambda m: m.running_score, reverse=True)
+        ordered = sorted(
+            all_marks,
+            key=lambda m: m.running_score,
+            reverse=True
+        )
 
         for idx, m in enumerate(ordered, start=1):
             if m.id == self.id:
@@ -457,9 +504,12 @@ class Marks(models.Model):
 
     def save(self, *args, **kwargs):
 
+        # auto total calculation
         self.total = self.cam + (self.ese or 0)
+
         super().save(*args, **kwargs)
 
+        # trigger grading engine
         update_fields = kwargs.get('update_fields')
         if update_fields is None:
             assign_relative_grades(self.subject)

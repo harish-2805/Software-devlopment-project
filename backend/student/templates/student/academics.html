@@ -4,165 +4,292 @@
 {% block nav_academics %}active{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'student/academics.css' %}">
+<link rel="stylesheet" href="{% static 'css/academics.css' %}">
 
-<div class="page-header">
-    <h2>📚 Academics</h2>
-    <p class="page-sub">Semester {{ semester }} &nbsp;|&nbsp; {{ student.department.name }}</p>
-</div>
-
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#e0f2fe;">🎓</div>
-        <div class="stat-info">
-            <div class="stat-value">{{ cgpa }}</div>
-            <div class="stat-label">CGPA</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#ede9fe;">📈</div>
-        <div class="stat-info">
-            <div class="stat-value">{{ sgpa }}</div>
-            <div class="stat-label">SGPA (Sem {{ semester }})</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#dcfce7;">📖</div>
-        <div class="stat-info">
-            <div class="stat-value">{{ subjects_data|length }}</div>
-            <div class="stat-label">Subjects</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#fee2e2;">❌</div>
-        <div class="stat-info">
-            <div class="stat-value">
-                {% with count=0 %}{% for s in subjects_data %}{% if s.grade == 'F' %}{{ forloop.counter }}{% endif %}{% endfor %}{% endwith %}0
+<div class="academics-container fade-in-up">
+    {% if subjects_data %}
+    
+    <!-- Modern Hero Section -->
+    <div class="modern-hero">
+        <div class="hero-bg-pattern"></div>
+        <div class="hero-content-modern">
+            <div class="hero-left">
+                <div class="semester-badge">Semester {{ semester }}</div>
+                <h1 class="hero-title-modern">Academic Performance</h1>
+                <p class="hero-description">Track your subject-wise performance and grades</p>
+                <div class="grading-badge">
+                    📊 Relative Grading • Based on class performance distribution
+                </div>
             </div>
-            <div class="stat-label">Backlogs</div>
+            <div class="hero-right">
+                <div class="sgpa-modern-card">
+                    <div class="sgpa-circle">
+                        <span class="sgpa-number">{{ sgpa }}</span>
+                        <span class="sgpa-max">/10.0</span>
+                    </div>
+                    <div class="sgpa-info">
+                        <span class="sgpa-label-modern">Semester GPA</span>
+                        <span class="sgpa-status {% if sgpa >= 8 %}excellent{% elif sgpa >= 6 %}good{% else %}needs-improvement{% endif %}">
+                            {% if sgpa >= 8 %}🎉 Excellent{% elif sgpa >= 6 %}👍 Good{% else %}⚠️ Needs Improvement{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Grouped Bar Chart -->
-<div class="table-card">
-    <div class="table-card-title">Marks Breakdown by Subject</div>
-    {% if subjects_data %}
-        <canvas id="marksChart" height="90"></canvas>
+    <!-- Quick Stats Cards -->
+    <div class="quick-stats">
+        <div class="stat-item">
+            <div class="stat-icon-wrapper">
+                <span class="stat-icon">📚</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number">{{ subjects_data|length }}</span>
+                <span class="stat-label">Total Subjects</span>
+            </div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-icon-wrapper">
+                <span class="stat-icon">⭐</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number">
+                    {% for s in subjects_data %}
+                        {% if forloop.first %}
+                            {% if not s.is_at_risk %}Safe{% else %}Risk{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </span>
+                <span class="stat-label">Status</span>
+            </div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-icon-wrapper">
+                <span class="stat-icon">⚡</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number">
+                    {% with total=0 %}
+                        {% for s in subjects_data %}
+                            {{ forloop.counter0|add:s.credits }}
+                        {% endfor %}
+                    {% endwith %}
+                </span>
+                <span class="stat-label">Total Credits</span>
+            </div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-icon-wrapper">
+                <span class="stat-icon">🎯</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number">
+                    {% with risk_count=0 %}
+                        {% for s in subjects_data %}
+                            {% if s.is_at_risk %}
+                                {{ risk_count|add:1 }}
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                </span>
+                <span class="stat-label">At Risk</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Subject Table -->
+    <div class="subjects-card">
+        <div class="card-header">
+            <div class="header-title">
+                <span class="title-icon">📖</span>
+                <h3>Subject-wise Performance Analysis</h3>
+            </div>
+            <div class="relative-info">
+                <span class="info-badge">📊 Relative Grading Active</span>
+            </div>
+        </div>
+        
+        <div class="table-wrapper">
+            <table class="subjects-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Code</th>
+                        <th>Credits</th>
+                        <th>Minor1<br><small>/10</small></th>
+                        <th>Midsem<br><small>/30</small></th>
+                        <th>Minor2<br><small>/10</small></th>
+                        <th>CAM<br><small>/50</small></th>
+                        <th>ESE<br><small>/50</small></th>
+                        <th>Total<br><small>/100</small></th>
+                        <th>Running<br><small>Score</small></th>
+                        <th>Predicted<br><small>Grade</small></th>
+                        <th>Rank</th>
+                        <th>Grade</th>
+                        <th>Points</th>
+                        <th>Status</th>
+                        <th>Needed for<br><small>Next Grade</small></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in subjects_data %}
+                    <tr class="subject-row {% if s.is_at_risk %}risk-row{% endif %}">
+                        <!-- Subject Name -->
+                        <td class="subject-cell">
+                            <div class="subject-info">
+                                <strong>{{ s.subject }}</strong>
+                            </div>
+                        </td>
+                        
+                        <!-- Subject Code -->
+                        <td>
+                            <span class="code-badge">{{ s.code }}</span>
+                        </td>
+                        
+                        <!-- Credits -->
+                        <td class="credits-cell">{{ s.credits }}</td>
+                        
+                        <!-- Minor 1 -->
+                        <td class="marks-cell {% if s.minor1 < 5 %}low-marks{% endif %}">
+                            {{ s.minor1 }}
+                        </td>
+                        
+                        <!-- Midsem -->
+                        <td class="marks-cell {% if s.midsem < 15 %}low-marks{% endif %}">
+                            {{ s.midsem }}
+                        </td>
+                        
+                        <!-- Minor 2 -->
+                        <td class="marks-cell {% if s.minor2 < 5 %}low-marks{% endif %}">
+                            {{ s.minor2 }}
+                        </td>
+                        
+                        <!-- CAM -->
+                        <td class="marks-cell cam-cell">
+                            <strong>{{ s.cam }}</strong>
+                        </td>
+                        
+                        <!-- ESE -->
+                        <td class="marks-cell {% if s.ese and s.ese < 25 %}low-marks{% endif %}">
+                            {{ s.ese|default:"-" }}
+                        </td>
+                        
+                        <!-- Total -->
+                        <td class="total-cell">
+                            <strong>{{ s.total|default:"-" }}</strong>
+                        </td>
+                        
+                        <!-- Running Score -->
+                        <td class="running-cell">
+                            <strong>{{ s.running_score }}</strong>
+                        </td>
+                        
+                        <!-- Predicted Grade -->
+                        <td class="predicted-cell">
+                            {% if s.predicted_grade and s.predicted_grade != '-' %}
+                                <span class="prediction-badge 
+                                    {% if s.predicted_grade == 'EX' %}pred-ex
+                                    {% elif s.predicted_grade == 'A' %}pred-a
+                                    {% elif s.predicted_grade == 'B' %}pred-b
+                                    {% elif s.predicted_grade == 'C' %}pred-c
+                                    {% elif s.predicted_grade == 'D' %}pred-d
+                                    {% else %}pred-p
+                                    {% endif %}">
+                                    {{ s.predicted_grade }}
+                                </span>
+                            {% else %}
+                                <span class="no-data">—</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Rank -->
+                        <td class="rank-cell">
+                            {% if s.rank and s.rank != '-' %}
+                                <span class="rank-badge">
+                                    {% if s.rank == 1 %}🥇
+                                    {% elif s.rank == 2 %}🥈
+                                    {% elif s.rank == 3 %}🥉
+                                    {% else %}#{% endif %}
+                                    {{ s.rank }}
+                                </span>
+                            {% else %}
+                                <span class="no-data">—</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Grade -->
+                        <td class="grade-cell">
+                            {% if s.grade == 'EX' %}
+                                <span class="grade-badge ex">EX</span>
+                            {% elif s.grade == 'A' %}
+                                <span class="grade-badge a">A</span>
+                            {% elif s.grade == 'B' %}
+                                <span class="grade-badge b">B</span>
+                            {% elif s.grade == 'C' %}
+                                <span class="grade-badge c">C</span>
+                            {% elif s.grade == 'D' %}
+                                <span class="grade-badge d">D</span>
+                            {% elif s.grade == 'P' %}
+                                <span class="grade-badge p">P</span>
+                            {% elif s.grade == 'F' %}
+                                <span class="grade-badge f">F</span>
+                            {% else %}
+                                <span class="grade-badge default">-</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Points -->
+                        <td class="points-cell">{{ s.grade_points }}</td>
+                        
+                        <!-- Status -->
+                        <td class="status-cell">
+                            {% if s.is_at_risk %}
+                                <span class="risk-indicator">
+                                    <span class="risk-dot"></span>
+                                    At Risk
+                                </span>
+                            {% else %}
+                                <span class="safe-indicator">
+                                    <span class="safe-dot"></span>
+                                    Safe
+                                </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Marks Needed -->
+                        <td class="needed-cell">
+                            {% if s.marks_needed and s.marks_needed != '-' %}
+                                <span class="needed-tooltip">
+                                    {{ s.marks_needed }}
+                                </span>
+                            {% else %}
+                                <span class="top-rank">🏆 Top</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="sgpa-footer">
+                        <td colspan="13" class="sgpa-label-footer">Semester Grade Point Average (SGPA)</td>
+                        <td colspan="3" class="sgpa-value-footer">{{ sgpa }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    
     {% else %}
-        <div class="no-data">No marks uploaded yet by faculty.</div>
+    <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <h3>No Academic Data Available</h3>
+        <p>Your marks for this semester haven't been published yet.</p>
+        <p class="empty-hint">Check back later or contact your academic coordinator.</p>
+    </div>
     {% endif %}
 </div>
-
-<!-- Marks Table -->
-<div class="table-card" style="margin-top:20px;">
-    <div class="table-card-title">Subject-wise Marks</div>
-    {% if subjects_data %}
-    <div class="table-scroll">
-    <table>
-        <thead>
-            <tr>
-                <th>Subject</th>
-                <th>Code</th>
-                <th>Credits</th>
-                <th>Minor 1<br><small>/10</small></th>
-                <th>Midsem<br><small>/30</small></th>
-                <th>Minor 2<br><small>/10</small></th>
-                <th>CAM<br><small>/50</small></th>
-                <th>ESE<br><small>/50</small></th>
-                <th>Total<br><small>/100</small></th>
-                <th>Grade</th>
-                <th>Points</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for s in subjects_data %}
-            <tr>
-                <td><strong>{{ s.subject }}</strong></td>
-                <td><span class="badge badge-blue">{{ s.code }}</span></td>
-                <td>{{ s.credits }}</td>
-                <td>{{ s.minor1 }}</td>
-                <td>{{ s.midsem }}</td>
-                <td>{{ s.minor2 }}</td>
-                <td><strong>{{ s.cam }}</strong></td>
-                <td>{{ s.ese }}</td>
-                <td><strong>{{ s.total }}</strong></td>
-                <td>
-                    {% if s.grade == 'EX' %}
-                        <span class="badge badge-purple">EX</span>
-                    {% elif s.grade == 'A' %}
-                        <span class="badge badge-green">A</span>
-                    {% elif s.grade == 'B' %}
-                        <span class="badge badge-green">B</span>
-                    {% elif s.grade == 'C' %}
-                        <span class="badge badge-blue">C</span>
-                    {% elif s.grade == 'D' %}
-                        <span class="badge badge-yellow">D</span>
-                    {% elif s.grade == 'P' %}
-                        <span class="badge badge-yellow">P</span>
-                    {% elif s.grade == 'F' %}
-                        <span class="badge badge-red">F</span>
-                    {% else %}
-                        <span class="badge" style="background:#f1f5f9;color:#64748b;">-</span>
-                    {% endif %}
-                </td>
-                <td>{{ s.grade_points }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr class="tfoot-row">
-                <td colspan="9" style="text-align:right;">SGPA (Sem {{ semester }})</td>
-                <td colspan="2" class="sgpa-val">{{ sgpa }}</td>
-            </tr>
-        </tfoot>
-    </table>
-    </div>
-    {% else %}
-        <div class="no-data">No marks data available yet.</div>
-    {% endif %}
-</div>
-
-<!-- Grade Scale -->
-<div class="table-card grade-legend">
-    <div class="table-card-title">Grade Scale (NIT Andhra Pradesh)</div>
-    <div class="legend-grid">
-        <div class="legend-item"><span class="badge badge-purple">EX</span><span>Outstanding — 10 pts</span></div>
-        <div class="legend-item"><span class="badge badge-green">A</span><span>Excellent — 9 pts</span></div>
-        <div class="legend-item"><span class="badge badge-green">B</span><span>Very Good — 8 pts</span></div>
-        <div class="legend-item"><span class="badge badge-blue">C</span><span>Good — 7 pts</span></div>
-        <div class="legend-item"><span class="badge badge-blue">D</span><span>Average — 6 pts</span></div>
-        <div class="legend-item"><span class="badge badge-yellow">P</span><span>Pass — 5 pts</span></div>
-        <div class="legend-item"><span class="badge badge-red">F</span><span>Fail — 0 pts</span></div>
-    </div>
-</div>
-
-<script>
-{% if subjects_data %}
-const ctx = document.getElementById('marksChart').getContext('2d');
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: {{ chart_labels|safe }},
-        datasets: [
-            { label: 'Minor 1', data: {{ chart_minor1|safe }}, backgroundColor: 'rgba(99,102,241,0.75)', borderRadius: 4 },
-            { label: 'Midsem',  data: {{ chart_midsem|safe }}, backgroundColor: 'rgba(34,197,94,0.75)',  borderRadius: 4 },
-            { label: 'Minor 2', data: {{ chart_minor2|safe }}, backgroundColor: 'rgba(251,191,36,0.75)', borderRadius: 4 },
-            { label: 'ESE',     data: {{ chart_ese|safe }},    backgroundColor: 'rgba(239,68,68,0.75)',  borderRadius: 4 },
-        ]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'top', labels: { font: { size: 12 }, padding: 16 } },
-            tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}` } }
-        },
-        scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-            x: { grid: { display: false } }
-        }
-    }
-});
-{% endif %}
-</script>
 {% endblock %}

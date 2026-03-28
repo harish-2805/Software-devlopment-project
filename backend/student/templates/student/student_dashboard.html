@@ -1,127 +1,113 @@
 {% extends 'student/base.html' %}
+{% load static %}
 {% block title %}Dashboard{% endblock %}
 {% block nav_dashboard %}active{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2>Welcome back, {{ student.user.first_name|default:student.user.username }} 👋</h2>
-    <p class="page-sub">{{ student.department.name }} &nbsp;|&nbsp; Semester {{ student.semester }} &nbsp;|&nbsp; Year {{ student.year }}</p>
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+<div class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="page-header">
+        <h2>Welcome back, {{ student.user.first_name|default:student.user.username }} 👋</h2>
+        <p class="page-sub">{{ student.department.name }} &nbsp;|&nbsp; Semester {{ student.semester }} &nbsp;|&nbsp; Year {{ student.year }}</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#e0f2fe;">📊</div>
+            <div class="stat-info">
+                <div class="stat-value {% if cgpa >= 8 %}highlight-positive{% elif cgpa >= 6 %}highlight-warning{% else %}highlight-negative{% endif %}">
+                    {{ cgpa }}
+                </div>
+                <div class="stat-label">CGPA</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#ede9fe;">📈</div>
+            <div class="stat-info">
+                <div class="stat-value {% if sgpa >= 8 %}highlight-positive{% elif sgpa >= 6 %}highlight-warning{% else %}highlight-negative{% endif %}">
+                    {{ sgpa }}
+                </div>
+                <div class="stat-label">SGPA (This Sem)</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#dcfce7;">📋</div>
+            <div class="stat-info">
+                <div class="stat-value {% if attendance_pct >= 80 %}highlight-positive{% elif attendance_pct >= 60 %}highlight-warning{% else %}highlight-negative{% endif %}">
+                    {{ attendance_pct }}%
+                </div>
+                <div class="stat-label">Attendance</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fef9c3;">🏆</div>
+            <div class="stat-info">
+                <div class="stat-value {% if rank <= 10 %}highlight-positive{% elif rank <= 30 %}highlight-warning{% else %}highlight-negative{% endif %}">
+                    #{{ rank }}
+                </div>
+                <div class="stat-label">Dept. Rank</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
+            <div class="stat-info">
+                <div class="stat-value {% if backlogs == 0 %}highlight-positive{% elif backlogs <= 2 %}highlight-warning{% else %}highlight-negative{% endif %}">
+                    {{ backlogs }}
+                </div>
+                <div class="stat-label">Backlogs</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Details Card -->
+    <div class="info-card">
+        <div class="info-card-title">Profile Details</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-key">Roll No</span>
+                <span class="info-val">{{ student.roll_no }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-key">Email</span>
+                <span class="info-val">{{ student.user.email|default:"Not set" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-key">Department</span>
+                <span class="info-val">{{ student.department.name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-key">Year</span>
+                <span class="info-val">{{ student.get_year_display }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-key">Semester</span>
+                <span class="info-val">{{ student.get_semester_display }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-key">CGPA</span>
+                <span class="info-val {% if cgpa >= 8 %}highlight-positive{% elif cgpa >= 6 %}highlight-warning{% else %}highlight-negative{% endif %}">
+                    {{ cgpa }}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-key">Attendance</span>
+                <span class="info-val {% if attendance_pct >= 80 %}highlight-positive{% elif attendance_pct >= 60 %}highlight-warning{% else %}highlight-negative{% endif %}">
+                    {{ attendance_pct }}%
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-key">Department Rank</span>
+                <span class="info-val">#{{ rank }}</span>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#e0f2fe;">📊</div>
-        <div class="stat-info">
-            <div class="stat-value">{{ cgpa }}</div>
-            <div class="stat-label">CGPA</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#ede9fe;">📈</div>
-        <div class="stat-info">
-            <div class="stat-value">{{ sgpa }}</div>
-            <div class="stat-label">SGPA (This Sem)</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#dcfce7;">📋</div>
-        <div class="stat-info">
-            <div class="stat-value">{{ attendance_pct }}%</div>
-            <div class="stat-label">Attendance</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#fef9c3;">🏆</div>
-        <div class="stat-info">
-            <div class="stat-value">#{{ rank }}</div>
-            <div class="stat-label">Dept. Rank</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
-        <div class="stat-info">
-            <div class="stat-value">{{ backlogs }}</div>
-            <div class="stat-label">Backlogs</div>
-        </div>
-    </div>
-</div>
-
-<div class="charts-row">
-    <div class="chart-card">
-        <div class="chart-title">Subject-wise Total Marks</div>
-        {% if chart_labels %}
-            <canvas id="marksChart" height="220"></canvas>
-        {% else %}
-            <div class="no-data">No marks data available yet</div>
-        {% endif %}
-    </div>
-    <div class="chart-card chart-card-sm">
-        <div class="chart-title">Attendance Overview</div>
-        <canvas id="attendanceChart" height="220"></canvas>
-        <div class="doughnut-label">{{ attendance_pct }}%</div>
-    </div>
-</div>
-
-<div class="info-card">
-    <div class="info-card-title">Profile Details</div>
-    <div class="info-grid">
-        <div class="info-item"><span class="info-key">Roll No</span><span class="info-val">{{ student.roll_no }}</span></div>
-        <div class="info-item"><span class="info-key">Email</span><span class="info-val">{{ student.user.email|default:"Not set" }}</span></div>
-        <div class="info-item"><span class="info-key">Department</span><span class="info-val">{{ student.department.name }}</span></div>
-        <div class="info-item"><span class="info-key">Year</span><span class="info-val">{{ student.get_year_display }}</span></div>
-        <div class="info-item"><span class="info-key">Semester</span><span class="info-val">{{ student.get_semester_display }}</span></div>
-        <div class="info-item"><span class="info-key">CGPA</span><span class="info-val">{{ cgpa }}</span></div>
-    </div>
-</div>
-
-<script>
-{% if chart_labels %}
-const marksCtx = document.getElementById('marksChart').getContext('2d');
-new Chart(marksCtx, {
-    type: 'bar',
-    data: {
-        labels: {{ chart_labels|safe }},
-        datasets: [{
-            label: 'Total Marks',
-            data: {{ chart_data|safe }},
-            backgroundColor: [
-                'rgba(99,102,241,0.7)','rgba(34,197,94,0.7)','rgba(251,191,36,0.7)',
-                'rgba(239,68,68,0.7)','rgba(20,184,166,0.7)','rgba(249,115,22,0.7)',
-                'rgba(168,85,247,0.7)','rgba(59,130,246,0.7)'
-            ],
-            borderWidth: 1.5, borderRadius: 6,
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-            y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } },
-            x: { grid: { display: false } }
-        }
-    }
-});
-{% endif %}
-
-const attCtx = document.getElementById('attendanceChart').getContext('2d');
-const attPct = {{ attendance_pct }};
-new Chart(attCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Attended', 'Missed'],
-        datasets: [{
-            data: [attPct, 100 - attPct],
-            backgroundColor: [
-                attPct >= 80 ? 'rgba(34,197,94,0.8)' : attPct >= 60 ? 'rgba(251,191,36,0.8)' : 'rgba(239,68,68,0.8)',
-                'rgba(229,231,235,0.5)'
-            ],
-            borderWidth: 0, hoverOffset: 6,
-        }]
-    },
-    options: {
-        responsive: true, cutout: '72%',
-        plugins: { legend: { position: 'bottom' } }
-    }
-});
-</script>
 {% endblock %}
