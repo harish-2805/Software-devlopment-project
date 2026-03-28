@@ -8,4 +8,8 @@ urlpatterns = [
     path('messages/',   views.student_messages,  name='student_messages'),
     path('alumni/',     views.alumni,             name='student_alumni'),
     path('profile/',    views.student_profile,   name='student_profile'),
+        # Backlog URLs
+    path('register-backlog/', views.register_backlog, name='register_backlog'),
+    path('backlog-status/', views.backlog_status, name='backlog_status'),
+    path('upload-receipt/', views.upload_receipt, name='upload_receipt'),
 ]

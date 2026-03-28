@@ -1,0 +1,320 @@
+/* ============================================================
+   STUDENT PORTAL — messages_alumni.css
+   Covers: messages.html + alumni.html
+   ============================================================ */
+
+/* ════════════════════════════════════════════
+   MESSAGES PAGE
+   ════════════════════════════════════════════ */
+
+.msg-container { max-width: 900px; margin: 0 auto; }
+
+.page-header { margin-bottom: 24px; }
+.page-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -.3px;
+}
+.page-header p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ── Compose Card ── */
+.compose-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.compose-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border-subtle);
+}
+
+.form-group   { margin-bottom: 14px; }
+.form-label   { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  background: var(--surface);
+  transition: border-color .2s, box-shadow .2s;
+  resize: vertical;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.btn-send {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  border: none;
+  padding: 11px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: opacity .2s, transform .15s;
+  box-shadow: 0 4px 12px rgba(99,102,241,.25);
+}
+.btn-send:hover { opacity: .9; transform: translateY(-1px); }
+
+/* ── Messages Section ── */
+.msgs-section { margin-top: 8px; }
+.msgs-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+
+/* ── Individual Message Cards ── */
+.msg-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+  border-left: 4px solid var(--primary-light);
+  transition: transform .2s, box-shadow .2s;
+}
+.msg-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.msg-card.replied { border-left-color: var(--success); }
+
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.msg-subject {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.msg-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.msg-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.status-pending { background: #dbeafe; color: #1d4ed8; }
+.status-replied { background: #dcfce7; color: #15803d; }
+
+.msg-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+
+.reply-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #166534;
+  line-height: 1.6;
+}
+
+.reply-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #15803d;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 5px;
+}
+
+/* ── Empty Messages ── */
+.empty-msgs {
+  text-align: center;
+  padding: 56px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.empty-msgs p { font-size: 14px; }
+
+/* ════════════════════════════════════════════
+   ALUMNI PAGE
+   ════════════════════════════════════════════ */
+
+.alumni-container { max-width: 1200px; margin: 0 auto; }
+
+.alumni-hero {
+  background: linear-gradient(135deg, #5b21b6 0%, #1d4ed8 100%);
+  border-radius: 20px;
+  padding: 32px 36px;
+  color: #fff;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 32px rgba(91,33,182,.3);
+}
+.alumni-hero h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; letter-spacing: -.4px; }
+.alumni-hero p  { font-size: 14px; opacity: .85; }
+
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border);
+  letter-spacing: -.2px;
+}
+
+/* ── Alumni Grid ── */
+.alumni-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.alumni-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform .25s, box-shadow .25s, border-color .2s;
+}
+.alumni-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: #a5b4fc;
+}
+
+.alumni-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.alumni-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #2563eb);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alumni-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.alumni-batch {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.alumni-dept {
+  display: inline-block;
+  padding: 3px 12px;
+  background: #ede9fe;
+  color: #6d28d9;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.alumni-info { display: flex; flex-direction: column; gap: 6px; }
+
+.alumni-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.alumni-info-row .icon { font-size: 15px; line-height: 1; }
+
+.alumni-linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0a66c2;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background .2s, transform .15s;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(10,102,194,.25);
+}
+.alumni-linkedin:hover {
+  background: #004182;
+  transform: translateY(-1px);
+}
+
+.no-linkedin {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* ── Empty State ── */
+.empty-state {
+  text-align: center;
+  padding: 56px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.empty-state h3 { font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
+.empty-state p  { font-size: 14px; }

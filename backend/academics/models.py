@@ -494,12 +494,13 @@ class Marks(models.Model):
 
     # ───────── AT RISK DETECTION ─────────
 
+# Add this property to your Marks class
     @property
     def is_at_risk(self):
-        """Student likely to fail relative grading"""
-        grade = self.predicted_grade
-        return grade in ["P", None]
-
+        """At risk based on current grade - F, P, or D"""
+        if self.grade in ['F', 'P', 'D']:
+            return True
+        return False
     # ───────── SAVE ─────────
 
     def save(self, *args, **kwargs):
@@ -580,3 +581,54 @@ class Alumni(models.Model):
 
     class Meta:
         ordering = ['-batch_year']
+
+# ─────────────────────────────────────────────
+# BACKLOG MODEL
+# ─────────────────────────────────────────────
+class Backlog(models.Model):
+    STATUS_CHOICES = [
+        ('registered', 'Registered (Payment Pending)'),
+        ('payment_verified', 'Payment Verified'),
+        ('approved', 'Approved for Exam'),
+        ('completed', 'Exam Completed'),
+        ('passed', 'Passed'),
+        ('failed', 'Failed'),
+    ]
+    
+    PAYMENT_METHOD_CHOICES = [
+        ('online', 'Online Payment'),
+        ('offline', 'Offline (Bank Challan)'),
+        ('pending', 'Payment Pending'),
+    ]
+    
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='backlogs')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    attempt_number = models.IntegerField(default=1)
+    
+    # Registration details
+    registration_date = models.DateTimeField(auto_now_add=True)
+    exam_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='registered')
+    
+    # Payment details
+    payment_status = models.BooleanField(default=False)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='pending')
+    payment_id = models.CharField(max_length=100, blank=True, null=True)
+    payment_receipt = models.FileField(upload_to='backlog_receipts/', blank=True, null=True)
+    amount = models.IntegerField(default=500)  # Backlog exam fee
+    
+    # Results
+    result_marks = models.IntegerField(null=True, blank=True)
+    result_grade = models.CharField(max_length=3, null=True, blank=True)
+    result_grade_points = models.IntegerField(null=True, blank=True)
+    
+    remarks = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-registration_date']
+        unique_together = ['student', 'subject', 'attempt_number']
+    
+    def __str__(self):
+        return f"{self.student} - {self.subject} (Attempt {self.attempt_number})"

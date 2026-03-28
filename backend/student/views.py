@@ -6,6 +6,12 @@ from academics.models import (
     calculate_sgpa, calculate_cgpa
 )
 from users.models import Faculty
+from academics.models import Backlog
+from academics.forms import BacklogRegistrationForm
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+import json
 
 
 @login_required
@@ -13,9 +19,9 @@ def dashboard(request):
     if request.user.role != 'student':
         return redirect('login')
 
-    student    = request.user.student
-    marks_qs   = Marks.objects.filter(student=student).select_related('subject')
-    semester   = student.semester
+    student = request.user.student
+    marks_qs = Marks.objects.filter(student=student).select_related('subject')
+    semester = student.semester
 
     # SGPA for current semester
     sgpa = calculate_sgpa(student, semester)
@@ -23,21 +29,27 @@ def dashboard(request):
     # CGPA across all semesters
     cgpa = calculate_cgpa(student, semester)
 
-    # Backlogs = F grade subjects
+    # Backlogs = F grade subjects (not yet cleared)
     backlogs = marks_qs.filter(grade='F').count()
+    
+    # Active backlogs (registered but not yet cleared)
+    active_backlogs = Backlog.objects.filter(
+        student=student,
+        status__in=['registered', 'approved', 'completed']
+    ).count()
 
     # Overall attendance
     attendance_qs = Attendance.objects.filter(student=student)
     if attendance_qs.exists():
         total_attended = sum(a.attended_classes for a in attendance_qs)
-        total_classes  = sum(a.total_classes    for a in attendance_qs)
+        total_classes = sum(a.total_classes for a in attendance_qs)
         attendance_pct = round((total_attended / total_classes) * 100, 1) if total_classes > 0 else 0
     else:
         attendance_pct = 0
 
     # Department rank by total marks this semester
     from users.models import Student
-    dept_students  = Student.objects.filter(
+    dept_students = Student.objects.filter(
         department=student.department,
         semester=student.semester
     )
@@ -53,26 +65,26 @@ def dashboard(request):
 
     # Chart data
     chart_labels = [m.subject.name for m in marks_qs]
-    chart_data   = [m.total or 0   for m in marks_qs]
+    chart_data = [m.total or 0 for m in marks_qs]
 
     return render(request, 'student/student_dashboard.html', {
-        'student':        student,
-        'sgpa':           sgpa,
-        'cgpa':           cgpa,
-        'backlogs':       backlogs,
+        'student': student,
+        'sgpa': sgpa,
+        'cgpa': cgpa,
+        'backlogs': backlogs,
+        'active_backlogs': active_backlogs,
         'attendance_pct': attendance_pct,
-        'rank':           rank,
-        'chart_labels':   chart_labels,
-        'chart_data':     chart_data,
+        'rank': rank,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
     })
-
 
 @login_required
 def academics(request):
     if request.user.role != 'student':
         return redirect('login')
 
-    student  = request.user.student
+    student = request.user.student
     semester = student.semester
     marks_qs = Marks.objects.filter(
         student=student,
@@ -82,53 +94,82 @@ def academics(request):
     subjects_data = []
     for m in marks_qs:
         subjects_data.append({
-        'subject':      m.subject.name,
-        'code':         m.subject.code,
-        'credits':      m.subject.credits,
-
-        'minor1':       m.minor1,
-        'midsem':       m.midsem,
-        'minor2':       m.minor2,
-        'cam':          m.cam,
-        'ese':          m.ese,
-
-        'total':        m.total or 0,
-        'running_score': m.running_score,
-
-        # FINAL grade (after ESE)
-        'grade':        m.grade or '-',
-        'grade_points': m.grade_points or 0,
-
-        # ⭐ NEW FEATURES
-        'predicted_grade': m.predicted_grade or '-',
-        'marks_needed':    m.marks_needed_for_next_grade or '-',
-        'rank':            m.current_rank or '-',
-        'is_at_risk':      m.is_at_risk,
-    })
+            'subject': m.subject.name,
+            'code': m.subject.code,
+            'credits': m.subject.credits,
+            'minor1': m.minor1,
+            'midsem': m.midsem,
+            'minor2': m.minor2,
+            'cam': m.cam,
+            'ese': m.ese,
+            'total': m.total or 0,
+            'running_score': m.running_score,
+            'grade': m.grade or '-',
+            'grade_points': m.grade_points or 0,
+            'predicted_grade': m.predicted_grade or '-',
+            'marks_needed': m.marks_needed_for_next_grade or '-',
+            'rank': m.current_rank or '-',
+            'is_at_risk': m.is_at_risk,
+        })
 
     sgpa = calculate_sgpa(student, semester)
     cgpa = calculate_cgpa(student, semester)
 
+    # Get backlog data
+    failed_subjects = []
+    for m in marks_qs:
+        if m.grade == 'F':
+            failed_subjects.append({
+                'id': m.subject.id,
+                'name': m.subject.name,
+                'code': m.subject.code,
+                'credits': m.subject.credits,
+            })
+    
+    # Get registered backlogs
+    registered_backlogs = Backlog.objects.filter(
+        student=student,
+        status__in=['registered', 'approved']
+    ).select_related('subject')
+    
+    # Get completed backlogs (results)
+    completed_backlogs = Backlog.objects.filter(
+        student=student,
+        status__in=['passed', 'failed']
+    ).select_related('subject')
+
+    # ========== ADD THESE CALCULATIONS ==========
+    # Calculate total credits
+    total_credits = sum(s['credits'] for s in subjects_data)
+    
+    # Calculate at risk count
+    at_risk_count = sum(1 for s in subjects_data if s['is_at_risk'])
+    # ===========================================
+
     # Chart data — grouped bars per subject
     chart_labels = [s['subject'] for s in subjects_data]
-    chart_minor1 = [s['minor1']  for s in subjects_data]
-    chart_midsem = [s['midsem']  for s in subjects_data]
-    chart_minor2 = [s['minor2']  for s in subjects_data]
-    chart_ese    = [s['ese']     for s in subjects_data]
+    chart_minor1 = [s['minor1'] for s in subjects_data]
+    chart_midsem = [s['midsem'] for s in subjects_data]
+    chart_minor2 = [s['minor2'] for s in subjects_data]
+    chart_ese = [s['ese'] for s in subjects_data]
 
     return render(request, 'student/academics.html', {
-        'student':       student,
+        'student': student,
         'subjects_data': subjects_data,
-        'sgpa':          sgpa,
-        'cgpa':          cgpa,
-        'semester':      semester,
-        'chart_labels':  chart_labels,
-        'chart_minor1':  chart_minor1,
-        'chart_midsem':  chart_midsem,
-        'chart_minor2':  chart_minor2,
-        'chart_ese':     chart_ese,
+        'sgpa': sgpa,
+        'cgpa': cgpa,
+        'semester': semester,
+        'failed_subjects': failed_subjects,
+        'registered_backlogs': registered_backlogs,
+        'completed_backlogs': completed_backlogs,
+        'total_credits': total_credits,      # ADD THIS
+        'at_risk_count': at_risk_count,      # ADD THIS
+        'chart_labels': chart_labels,
+        'chart_minor1': chart_minor1,
+        'chart_midsem': chart_midsem,
+        'chart_minor2': chart_minor2,
+        'chart_ese': chart_ese,
     })
-
 
 @login_required
 def attendance(request):
@@ -237,3 +278,113 @@ def student_profile(request):
         django_messages.success(request, 'Profile updated successfully!')
         return redirect('student_profile')
     return render(request, 'student/profile.html', {'student': student})
+
+@login_required
+def register_backlog(request):
+    if request.user.role != 'student':
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    if request.method == 'POST':
+        try:
+            # Check if it's file upload or JSON
+            if request.FILES:
+                # Handle payment receipt upload
+                backlog_id = request.POST.get('backlog_id')
+                payment_receipt = request.FILES.get('payment_receipt')
+                
+                if backlog_id and payment_receipt:
+                    backlog = Backlog.objects.get(id=backlog_id, student=request.user.student)
+                    backlog.payment_receipt = payment_receipt
+                    backlog.payment_method = 'offline'
+                    backlog.payment_status = False  # Admin will verify
+                    backlog.status = 'registered'
+                    backlog.save()
+                    
+                    django_messages.success(request, 'Payment receipt uploaded! Admin will verify and confirm your registration.')
+                    return redirect('student_academics')
+                
+                return JsonResponse({'error': 'Invalid upload'}, status=400)
+            
+            else:
+                # Initial registration (JSON request)
+                data = json.loads(request.body)
+                subject_id = data.get('subject_id')
+                subject_name = data.get('subject_name')
+                payment_method = data.get('payment_method', 'pending')
+                
+                student = request.user.student
+                subject = Subject.objects.get(id=subject_id)
+                
+                # Check existing backlogs
+                existing_backlogs = Backlog.objects.filter(
+                    student=student,
+                    subject=subject
+                ).count()
+                
+                # Create backlog registration
+                backlog = Backlog.objects.create(
+                    student=student,
+                    subject=subject,
+                    attempt_number=existing_backlogs + 1,
+                    status='registered',
+                    payment_status=False,
+                    payment_method=payment_method,
+                    amount=500
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Registration initiated for {subject.name}. Please upload payment receipt.',
+                    'backlog_id': backlog.id
+                })
+                
+        except Subject.DoesNotExist:
+            return JsonResponse({'error': 'Subject not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def backlog_status(request):
+    if request.user.role != 'student':
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    student = request.user.student
+    backlogs = Backlog.objects.filter(student=student).select_related('subject')
+    
+    data = []
+    for b in backlogs:
+        data.append({
+            'id': b.id,
+            'subject': b.subject.name,
+            'attempt': b.attempt_number,
+            'status': b.status,
+            'registration_date': b.registration_date.strftime('%Y-%m-%d'),
+            'exam_date': b.exam_date.strftime('%Y-%m-%d') if b.exam_date else None,
+            'payment_status': b.payment_status,
+            'result_marks': b.result_marks,
+            'result_grade': b.result_grade,
+        })
+    
+    return JsonResponse({'backlogs': data})
+
+@login_required
+def upload_receipt(request):
+    if request.user.role != 'student':
+        return redirect('login')
+    
+    if request.method == 'POST':
+        backlog_id = request.POST.get('backlog_id')
+        payment_receipt = request.FILES.get('payment_receipt')
+        
+        if backlog_id and payment_receipt:
+            backlog = Backlog.objects.get(id=backlog_id, student=request.user.student)
+            backlog.payment_receipt = payment_receipt
+            backlog.payment_method = 'offline'
+            backlog.save()
+            django_messages.success(request, 'Receipt uploaded! Admin will verify your payment.')
+        else:
+            django_messages.error(request, 'Please select a file to upload.')
+        
+        return redirect('student_academics')

@@ -5,141 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Faculty Portal{% endblock %}</title>
-    <style>
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-        :root {
-            --primary:#6366f1; --primary-dark:#4f46e5; --primary-light:#818cf8;
-            --success:#10b981; --warning:#f59e0b; --danger:#ef4444;
-            --dark:#0f172a; --gray-800:#1e293b; --gray-600:#475569;
-            --gray-500:#64748b; --gray-400:#94a3b8; --gray-200:#e2e8f0;
-            --gray-100:#f1f5f9; --white:#ffffff;
-            --shadow-sm:0 1px 2px rgba(0,0,0,.05);
-            --shadow-md:0 4px 6px -1px rgba(0,0,0,.1);
-            --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1);
-        }
-        body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--gray-100); color:var(--dark); }
-
-        /* TOPBAR */
-        .topbar { background:var(--gray-800); color:#fff; padding:0 24px; height:56px;
-                  display:flex; align-items:center; justify-content:space-between;
-                  position:sticky; top:0; z-index:100; box-shadow:var(--shadow-md); }
-        .topbar-brand { display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700; }
-        .topbar-right { display:flex; align-items:center; gap:14px; }
-        .topbar-user { font-size:13px; color:var(--gray-400); }
-        .logout-btn { background:var(--danger); color:#fff; border:none; padding:6px 14px;
-                      border-radius:8px; font-size:13px; cursor:pointer; text-decoration:none;
-                      font-family:inherit; }
-        .logout-btn:hover { background:#dc2626; }
-
-        /* LAYOUT */
-        .layout { display:flex; min-height:calc(100vh - 56px); }
-
-        /* SIDEBAR */
-        .sidebar { width:240px; background:var(--gray-800); flex-shrink:0; padding:20px 0; }
-        .sidebar-profile { text-align:center; padding:0 20px 20px; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:12px; }
-        .avatar { width:56px; height:56px; border-radius:50%; background:var(--primary);
-                  color:#fff; font-size:22px; font-weight:700;
-                  display:flex; align-items:center; justify-content:center; margin:0 auto 8px; }
-        .sidebar-name { color:#fff; font-size:14px; font-weight:600; }
-        .sidebar-role { color:var(--gray-400); font-size:12px; margin-top:2px; }
-        .nav-section { padding:8px 12px 4px; font-size:10px; text-transform:uppercase;
-                       letter-spacing:1px; color:var(--gray-400); font-weight:600; }
-        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 20px;
-                    color:#cbd5e1; text-decoration:none; font-size:14px;
-                    transition:all .2s; position:relative; }
-        .nav-item:hover { background:rgba(255,255,255,.06); color:#fff; }
-        .nav-item.active { background:rgba(99,102,241,.2); color:#fff;
-                           border-left:3px solid var(--primary); }
-        .nav-badge { background:var(--danger); color:#fff; font-size:10px;
-                     padding:2px 6px; border-radius:10px; margin-left:auto; font-weight:600; }
-
-        /* MAIN */
-        .main-content { flex:1; padding:28px; overflow-x:hidden; }
-        .page-header { margin-bottom:24px; }
-        .page-header h2 { font-size:22px; font-weight:700; color:var(--dark); }
-        .page-sub { color:var(--gray-500); font-size:14px; margin-top:4px; }
-
-        /* CARDS */
-        .card { background:#fff; border-radius:16px; padding:24px; box-shadow:var(--shadow-sm);
-                border:1px solid var(--gray-200); margin-bottom:20px; }
-        .card-title { font-size:15px; font-weight:700; color:var(--dark); margin-bottom:16px;
-                      padding-bottom:12px; border-bottom:2px solid var(--gray-200); }
-
-        /* STATS GRID */
-        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-                      gap:16px; margin-bottom:24px; }
-        .stat-card { background:#fff; border-radius:16px; padding:20px;
-                     display:flex; align-items:center; gap:14px;
-                     box-shadow:var(--shadow-sm); border:1px solid var(--gray-200);
-                     transition:all .3s; }
-        .stat-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
-        .stat-icon { width:48px; height:48px; border-radius:14px;
-                     display:flex; align-items:center; justify-content:center; font-size:22px; }
-        .stat-value { font-size:22px; font-weight:800; color:var(--dark); }
-        .stat-label { font-size:12px; color:var(--gray-500); margin-top:2px; }
-
-        /* TABLE */
-        .table-wrapper { overflow-x:auto; }
-        table { width:100%; border-collapse:collapse; }
-        th { text-align:left; font-size:12px; color:var(--gray-500); font-weight:600;
-             padding:10px 14px; border-bottom:2px solid var(--gray-200);
-             text-transform:uppercase; letter-spacing:.05em; }
-        td { padding:12px 14px; font-size:14px; color:#334155;
-             border-bottom:1px solid var(--gray-100); }
-        tr:last-child td { border-bottom:none; }
-        tr:hover td { background:var(--gray-100); }
-
-        /* BADGE */
-        .badge { display:inline-block; padding:3px 10px; border-radius:20px;
-                 font-size:12px; font-weight:600; }
-        .badge-blue { background:#dbeafe; color:#1d4ed8; }
-        .badge-green { background:#dcfce7; color:#15803d; }
-        .badge-red { background:#fee2e2; color:#dc2626; }
-        .badge-yellow { background:#fef9c3; color:#92400e; }
-
-        /* ALERT */
-        .alert { padding:12px 16px; border-radius:10px; margin-bottom:16px; font-size:14px; }
-        .alert-success { background:#dcfce7; color:#15803d; border-left:4px solid var(--success); }
-        .alert-error   { background:#fee2e2; color:#dc2626; border-left:4px solid var(--danger); }
-
-        /* FORM */
-        .form-group { margin-bottom:16px; }
-        .form-label { font-size:13px; font-weight:600; color:var(--gray-600); margin-bottom:6px; display:block; }
-        .form-control { width:100%; padding:10px 14px; border:1.5px solid var(--gray-200);
-                        border-radius:10px; font-size:14px; font-family:inherit;
-                        transition:border-color .2s; background:#fff; }
-        .form-control:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,.1); }
-        .form-control-sm { padding:6px 10px; font-size:13px; }
-        .btn { padding:10px 20px; border-radius:10px; font-size:14px; font-weight:600;
-               border:none; cursor:pointer; font-family:inherit; transition:all .2s; display:inline-flex; align-items:center; gap:6px; }
-        .btn-primary { background:var(--primary); color:#fff; }
-        .btn-primary:hover { background:var(--primary-dark); }
-        .btn-success { background:var(--success); color:#fff; }
-        .btn-success:hover { background:#059669; }
-        .btn-sm { padding:6px 14px; font-size:13px; }
-        select.form-control { cursor:pointer; }
-
-        /* SUBJECT SELECT CARD */
-        .select-card { background:#fff; border-radius:16px; padding:24px;
-                       box-shadow:var(--shadow-sm); border:1px solid var(--gray-200);
-                       margin-bottom:20px; display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
-
-        /* NO DATA */
-        .no-data { text-align:center; padding:48px; color:var(--gray-400); }
-        .no-data .no-icon { font-size:48px; margin-bottom:12px; }
-        .no-data p { font-size:15px; }
-
-        @media(max-width:768px) {
-            .layout { flex-direction:column; }
-            .sidebar { width:100%; }
-            .main-content { padding:16px; }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/faculty.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 
 <div class="topbar">
-    <div class="topbar-brand">🎓 Academic Portal — Faculty</div>
+    <div class="topbar-brand">
+        <span>🎓</span>
+        <span>Academic Portal — Faculty</span>
+    </div>
     <div class="topbar-right">
         <span class="topbar-user">👤 {{ request.user.username }}</span>
         <form method="post" action="{% url 'logout' %}" style="display:inline;">
@@ -156,29 +31,38 @@
             <div class="sidebar-name">{{ request.user.first_name|default:request.user.username }}</div>
             <div class="sidebar-role">Faculty · {{ request.user.faculty.department.name }}</div>
         </div>
-        <nav>
-            <div class="nav-section">Main</div>
+        <div class="nav-section">Main</div>
+        <div class="sidebar-nav">
             <a href="{% url 'faculty_dashboard' %}" class="nav-item {% block nav_dashboard %}{% endblock %}">
-                🏠 Dashboard
+                <span class="nav-icon">🏠</span>
+                <span>Dashboard</span>
             </a>
-            <div class="nav-section">Manage</div>
+        </div>
+        <div class="nav-section">Manage</div>
+        <div class="sidebar-nav">
             <a href="{% url 'faculty_attendance' %}" class="nav-item {% block nav_attendance %}{% endblock %}">
-                📋 Attendance
+                <span class="nav-icon">📋</span>
+                <span>Attendance</span>
             </a>
             <a href="{% url 'faculty_marks' %}" class="nav-item {% block nav_marks %}{% endblock %}">
-                📝 Marks &amp; Grades
+                <span class="nav-icon">📝</span>
+                <span>Marks &amp; Grades</span>
             </a>
             <a href="{% url 'faculty_messages' %}" class="nav-item {% block nav_messages %}{% endblock %}">
-                ✉️ Messages
+                <span class="nav-icon">✉️</span>
+                <span>Messages</span>
                 {% if unread_count %}
                     <span class="nav-badge">{{ unread_count }}</span>
                 {% endif %}
             </a>
-            <div class="nav-section">Account</div>
+        </div>
+        <div class="nav-section">Account</div>
+        <div class="sidebar-nav">
             <a href="{% url 'faculty_profile' %}" class="nav-item {% block nav_profile %}{% endblock %}">
-                👤 My Profile
+                <span class="nav-icon">👤</span>
+                <span>My Profile</span>
             </a>
-        </nav>
+        </div>
     </div>
 
     <div class="main-content">
@@ -191,5 +75,6 @@
     </div>
 </div>
 
+{% block extra_js %}{% endblock %}
 </body>
 </html>

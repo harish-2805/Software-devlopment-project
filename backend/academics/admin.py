@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Subject, Enrollment, Marks, Attendance, Message, Alumni
+from .models import Subject, Enrollment, Marks, Attendance, Message, Alumni,Backlog
 
 
 @admin.register(Subject)
@@ -40,3 +40,28 @@ class AlumniAdmin(admin.ModelAdmin):
     list_display  = ['name', 'department', 'batch_year', 'company', 'designation']
     list_filter   = ['department', 'batch_year']
     search_fields = ['name', 'company']
+
+@admin.register(Backlog)
+class BacklogAdmin(admin.ModelAdmin):
+    list_display = ['student', 'subject', 'attempt_number', 'status', 'payment_status', 'registration_date']
+    list_filter = ['status', 'payment_status', 'subject__department']
+    search_fields = ['student__user__username', 'subject__name', 'student__roll_no']
+    readonly_fields = ['registration_date', 'created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Student Information', {
+            'fields': ('student', 'subject', 'attempt_number')
+        }),
+        ('Registration Details', {
+            'fields': ('registration_date', 'exam_date', 'status')
+        }),
+        ('Payment Information', {
+            'fields': ('payment_status', 'payment_id', 'amount')
+        }),
+        ('Results', {
+            'fields': ('result_marks', 'result_grade', 'result_grade_points')
+        }),
+        ('Additional', {
+            'fields': ('remarks',)
+        }),
+    )

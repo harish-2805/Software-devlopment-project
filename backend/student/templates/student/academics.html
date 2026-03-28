@@ -39,68 +39,54 @@
     </div>
 
     <!-- Quick Stats Cards -->
-    <div class="quick-stats">
-        <div class="stat-item">
-            <div class="stat-icon-wrapper">
-                <span class="stat-icon">📚</span>
-            </div>
-            <div class="stat-info">
-                <span class="stat-number">{{ subjects_data|length }}</span>
-                <span class="stat-label">Total Subjects</span>
-            </div>
+<!-- Quick Stats Cards -->
+<div class="quick-stats">
+    <div class="stat-item">
+        <div class="stat-icon-wrapper">
+            <span class="stat-icon">📚</span>
         </div>
-        
-        <div class="stat-item">
-            <div class="stat-icon-wrapper">
-                <span class="stat-icon">⭐</span>
-            </div>
-            <div class="stat-info">
-                <span class="stat-number">
-                    {% for s in subjects_data %}
-                        {% if forloop.first %}
-                            {% if not s.is_at_risk %}Safe{% else %}Risk{% endif %}
-                        {% endif %}
-                    {% endfor %}
-                </span>
-                <span class="stat-label">Status</span>
-            </div>
-        </div>
-        
-        <div class="stat-item">
-            <div class="stat-icon-wrapper">
-                <span class="stat-icon">⚡</span>
-            </div>
-            <div class="stat-info">
-                <span class="stat-number">
-                    {% with total=0 %}
-                        {% for s in subjects_data %}
-                            {{ forloop.counter0|add:s.credits }}
-                        {% endfor %}
-                    {% endwith %}
-                </span>
-                <span class="stat-label">Total Credits</span>
-            </div>
-        </div>
-        
-        <div class="stat-item">
-            <div class="stat-icon-wrapper">
-                <span class="stat-icon">🎯</span>
-            </div>
-            <div class="stat-info">
-                <span class="stat-number">
-                    {% with risk_count=0 %}
-                        {% for s in subjects_data %}
-                            {% if s.is_at_risk %}
-                                {{ risk_count|add:1 }}
-                            {% endif %}
-                        {% endfor %}
-                    {% endwith %}
-                </span>
-                <span class="stat-label">At Risk</span>
-            </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ subjects_data|length }}</span>
+            <span class="stat-label">Total Subjects</span>
         </div>
     </div>
-
+    
+    <div class="stat-item">
+        <div class="stat-icon-wrapper">
+            <span class="stat-icon">⭐</span>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">
+                {% for s in subjects_data %}
+                    {% if forloop.first %}
+                        {% if not s.is_at_risk %}Safe{% else %}At Risk{% endif %}
+                    {% endif %}
+                {% endfor %}
+            </span>
+            <span class="stat-label">Status</span>
+        </div>
+    </div>
+    
+    <div class="stat-item">
+        <div class="stat-icon-wrapper">
+            <span class="stat-icon">⚡</span>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ total_credits }}</span>
+            <span class="stat-label">Total Credits</span>
+        </div>
+    </div>
+    
+    <div class="stat-item">
+        <div class="stat-icon-wrapper">
+            <span class="stat-icon">🎯</span>
+        </div>
+        <div class="stat-info">
+            <span class="stat-number">{{ at_risk_count }}</span>
+            <span class="stat-label">At Risk</span>
+        </div>
+    </div>
+</div>
     <!-- Main Subject Table -->
     <div class="subjects-card">
         <div class="card-header">
@@ -127,7 +113,7 @@
                         <th>ESE<br><small>/50</small></th>
                         <th>Total<br><small>/100</small></th>
                         <th>Running<br><small>Score</small></th>
-                        <th>Predicted<br><small>Grade</small></th>
+                        
                         <th>Rank</th>
                         <th>Grade</th>
                         <th>Points</th>
@@ -188,23 +174,7 @@
                             <strong>{{ s.running_score }}</strong>
                         </td>
                         
-                        <!-- Predicted Grade -->
-                        <td class="predicted-cell">
-                            {% if s.predicted_grade and s.predicted_grade != '-' %}
-                                <span class="prediction-badge 
-                                    {% if s.predicted_grade == 'EX' %}pred-ex
-                                    {% elif s.predicted_grade == 'A' %}pred-a
-                                    {% elif s.predicted_grade == 'B' %}pred-b
-                                    {% elif s.predicted_grade == 'C' %}pred-c
-                                    {% elif s.predicted_grade == 'D' %}pred-d
-                                    {% else %}pred-p
-                                    {% endif %}">
-                                    {{ s.predicted_grade }}
-                                </span>
-                            {% else %}
-                                <span class="no-data">—</span>
-                            {% endif %}
-                        </td>
+                    
                         
                         <!-- Rank -->
                         <td class="rank-cell">
@@ -283,6 +253,227 @@
         </div>
     </div>
     
+    <!-- BACKLOG SECTION -->
+    {% if failed_subjects or registered_backlogs or completed_backlogs %}
+    <div class="backlog-section">
+        <div class="backlog-header">
+            <div class="backlog-title">
+                <span class="backlog-icon">📝</span>
+                <h3>Backlog Management</h3>
+            </div>
+            <p class="backlog-subtitle">Register and track your backlog exams</p>
+        </div>
+        
+        <!-- Failed Subjects Table -->
+        {% if failed_subjects %}
+        <div class="backlog-card">
+            <div class="backlog-card-title">
+                <span>❌ Failed Subjects</span>
+                <span class="badge-warning">{{ failed_subjects|length }} subjects</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="backlog-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Code</th>
+                            <th>Credits</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in failed_subjects %}
+                        <tr>
+                            <td><strong>{{ subject.name }}</strong></td>
+                            <td><span class="code-badge">{{ subject.code }}</span></td>
+                            <td>{{ subject.credits }}</td>
+                            <td>
+                                <button class="btn-register-backlog" 
+                                        data-subject-id="{{ subject.id }}"
+                                        data-subject-name="{{ subject.name }}">
+                                    Register for Backlog
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Registered Backlogs -->
+        {% if registered_backlogs %}
+        <div class="backlog-card">
+            <div class="backlog-card-title">
+                <span>⏳ Registered Backlogs</span>
+                <span class="badge-info">{{ registered_backlogs|length }} pending</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="backlog-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Attempt</th>
+                            <th>Registration Date</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for backlog in registered_backlogs %}
+                        <tr>
+                            <td><strong>{{ backlog.subject.name }}</strong></td>
+                            <td>Attempt {{ backlog.attempt_number }}</td>
+                            <td>{{ backlog.registration_date|date:"d M Y" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ backlog.status }}">
+                                    {{ backlog.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if backlog.payment_receipt %}
+                                    <span class="payment-uploaded">✓ Receipt Uploaded</span>
+                                    <br><small>Awaiting verification</small>
+                                {% elif backlog.payment_status %}
+                                    <span class="payment-success">✓ Paid</span>
+                                {% else %}
+                                    <span class="payment-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not backlog.payment_receipt and not backlog.payment_status %}
+                                    <button class="btn-upload-receipt" data-backlog-id="{{ backlog.id }}">
+                                        Upload Receipt
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Backlog Results -->
+        {% if completed_backlogs %}
+        <div class="backlog-card">
+            <div class="backlog-card-title">
+                <span>📊 Backlog Results</span>
+                <span class="badge-success">{{ completed_backlogs|length }} completed</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="backlog-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Attempt</th>
+                            <th>Exam Date</th>
+                            <th>Result</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for backlog in completed_backlogs %}
+                        <tr>
+                            <td><strong>{{ backlog.subject.name }}</strong></td>
+                            <td>Attempt {{ backlog.attempt_number }}</td>
+                            <td>{{ backlog.exam_date|date:"d M Y"|default:"-" }}</td>
+                            <td>
+                                {% if backlog.status == 'passed' %}
+                                    <span class="result-passed">✓ Passed</span>
+                                {% else %}
+                                    <span class="result-failed">✗ Failed</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if backlog.result_grade %}
+                                    <span class="grade-badge {{ backlog.result_grade|lower }}">{{ backlog.result_grade }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Registration Modal -->
+    <div id="backlogModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Register for Backlog Exam</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>You are registering for:</p>
+                <div class="modal-subject-info">
+                    <strong id="modalSubjectName"></strong>
+                </div>
+                
+                <div class="payment-section">
+                    <h4>Exam Fee: ₹500</h4>
+                    <label class="payment-checkbox">
+                        <input type="checkbox" id="paymentConfirm">
+                        <span>I confirm that I will pay the exam fee and upload receipt after registration</span>
+                    </label>
+                </div>
+                
+                <div class="modal-note">
+                    <p>📌 Note: After registration, you need to upload payment receipt. Backlog exams will be conducted with junior batches. You will be notified about the exam schedule via email.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel">Cancel</button>
+                <button class="btn-submit" id="confirmRegistration">Confirm Registration</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Receipt Upload Modal -->
+    <div id="receiptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload Payment Receipt</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form method="post" action="{% url 'upload_receipt' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="backlog_id" id="receiptBacklogId">
+                    
+                    <div class="payment-info">
+                        <h4>Payment Instructions:</h4>
+                        <ul>
+                            <li>Amount: <strong>₹500</strong> per subject</li>
+                            <li>Bank: State Bank of India</li>
+                            <li>Account Name: NIT Andhra Pradesh - Backlog Exam</li>
+                            <li>Account Number: 12345678901</li>
+                            <li>IFSC Code: SBIN0001234</li>
+                        </ul>
+                        <p>After payment, upload the bank challan or UPI screenshot here.</p>
+                    </div>
+                    
+                    <div class="file-upload">
+                        <label>Upload Receipt (PDF/Image):</label>
+                        <input type="file" name="payment_receipt" accept=".pdf,.jpg,.jpeg,.png" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn-submit">Upload Receipt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     {% else %}
     <div class="empty-state">
         <div class="empty-icon">📚</div>
@@ -292,4 +483,136 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    // Backlog Registration Modal
+    const modal = document.getElementById('backlogModal');
+    const closeBtn = document.querySelector('.close-modal');
+    const cancelBtn = document.querySelector('.btn-cancel');
+    const confirmBtn = document.getElementById('confirmRegistration');
+    const paymentCheckbox = document.getElementById('paymentConfirm');
+    let selectedSubjectId = null;
+    let selectedSubjectName = null;
+    
+    // Open modal when register button clicked
+    document.querySelectorAll('.btn-register-backlog').forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectedSubjectId = this.dataset.subjectId;
+            selectedSubjectName = this.dataset.subjectName;
+            document.getElementById('modalSubjectName').textContent = selectedSubjectName;
+            modal.style.display = 'block';
+            paymentCheckbox.checked = false;
+        });
+    });
+    
+    // Close modal functions
+    function closeModal() {
+        modal.style.display = 'none';
+        selectedSubjectId = null;
+        selectedSubjectName = null;
+    }
+    
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) closeModal();
+    });
+    
+    // Confirm registration
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            if (!paymentCheckbox.checked) {
+                alert('Please confirm payment to proceed');
+                return;
+            }
+            
+            // Disable button and show loading
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Processing...';
+            
+            fetch('/student/register-backlog/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    subject_id: selectedSubjectId,
+                    subject_name: selectedSubjectName,
+                    payment_method: 'offline'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Registration successful! Please upload payment receipt.');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('An error occurred. Please try again.');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Confirm Registration';
+            });
+        });
+    }
+    
+    // Receipt Upload Modal
+    const receiptModal = document.getElementById('receiptModal');
+    let currentBacklogId = null;
+    
+    document.querySelectorAll('.btn-upload-receipt').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentBacklogId = this.dataset.backlogId;
+            document.getElementById('receiptBacklogId').value = currentBacklogId;
+            receiptModal.style.display = 'block';
+        });
+    });
+    
+    // Close receipt modal
+    if (receiptModal) {
+        const receiptCloseBtn = receiptModal.querySelector('.close-modal');
+        const receiptCancelBtn = receiptModal.querySelector('.btn-cancel');
+        
+        if (receiptCloseBtn) {
+            receiptCloseBtn.addEventListener('click', () => {
+                receiptModal.style.display = 'none';
+            });
+        }
+        
+        if (receiptCancelBtn) {
+            receiptCancelBtn.addEventListener('click', () => {
+                receiptModal.style.display = 'none';
+            });
+        }
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === receiptModal) {
+                receiptModal.style.display = 'none';
+            }
+        });
+    }
+    
+    // CSRF token helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
 {% endblock %}

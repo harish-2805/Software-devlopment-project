@@ -1,177 +1,263 @@
-/* ===============================
-   RESET
-=================================*/
+/* ============================================================
+   LOGIN PAGE — login_page.css
+   Modern styling matching student portal design
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Poppins", "Segoe UI", sans-serif;
 }
 
-/* ===============================
-   BODY BACKGROUND (Professional Gradient)
-=================================*/
 body {
-    height: 100vh;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
     align-items: center;
-    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
 }
 
-/* ===============================
-   CONTAINER (Premium Glass Card)
-=================================*/
+/* Animated Background Pattern */
+body::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: moveBackground 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes moveBackground {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(40px, 40px);
+    }
+}
+
+/* Login Container */
 #container {
+    background: white;
+    border-radius: 24px;
+    padding: 40px 36px;
     width: 100%;
     max-width: 420px;
-    padding: 40px 35px;
-    border-radius: 18px;
-
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-
-    border: 1px solid rgba(255, 255, 255, 0.15);
-
-    box-shadow:
-        0 15px 35px rgba(0, 0, 0, 0.4),
-        inset 0 0 10px rgba(255, 255, 255, 0.05);
-
-    transition: all 0.4s ease;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: fadeInUp 0.5s ease-out;
+    position: relative;
+    z-index: 1;
 }
 
-/* Slight lift effect */
-#container:hover {
-    transform: translateY(-6px);
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* ===============================
-   HEADING
-=================================*/
+/* Header */
 #container h2 {
+    font-size: 28px;
+    font-weight: 800;
     text-align: center;
-    margin-bottom: 30px;
-    font-size: 26px;
-    font-weight: 600;
-    color: #ffffff;
-    letter-spacing: 1px;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
-/* ===============================
-   FORM
-=================================*/
+/* Form Styling */
 form {
-    display: flex;
-    flex-direction: column;
+    margin-top: 28px;
+}
+
+form > div {
+    margin-bottom: 20px;
 }
 
 /* Labels */
 label {
-    color: #dcdcdc;
-    font-size: 14px;
-    margin-bottom: 6px;
     display: block;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
 }
 
-/* ===============================
-   INPUTS
-=================================*/
-input[type="text"],
-input[type="password"],
+/* Select Dropdown */
 select {
     width: 100%;
     padding: 12px 14px;
-    margin-bottom: 18px;
-
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-
     font-size: 14px;
-    transition: all 0.3s ease;
+    font-family: inherit;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    color: #0f172a;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 18px;
 }
 
-/* Placeholder color */
-input::placeholder {
-    color: #cccccc;
-}
-
-/* Focus effect */
-input:focus,
 select:focus {
     outline: none;
-    border: 1px solid #00c6ff;
-    box-shadow: 0 0 12px rgba(0, 198, 255, 0.6);
-    background: rgba(255, 255, 255, 0.15);
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-/* Dropdown text color fix */
-select option {
-    color: #000;
+select:hover {
+    border-color: #6366f1;
 }
 
-/* ===============================
-   BUTTON
-=================================*/
-button {
-    padding: 13px;
-    border-radius: 10px;
-    border: none;
+/* Input Fields */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    color: #0f172a;
+    transition: all 0.2s ease;
+}
 
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover {
+    border-color: #6366f1;
+}
+
+/* Button */
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: white;
     font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-
-    background: linear-gradient(135deg, #00c6ff, #0072ff);
-    color: #ffffff;
-
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-top: 8px;
 }
 
-/* Hover */
-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 114, 255, 0.4);
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
 }
 
-/* Active press */
-button:active {
-    transform: scale(0.97);
-}
-
-/* ===============================
-   FOOTER TEXT
-=================================*/
-#container p {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 14px;
-    color: #e0e0e0;
+button[type="submit"]:active {
+    transform: translateY(0);
 }
 
 /* Links */
-#container a {
-    color: #00c6ff;
-    text-decoration: none;
-    font-weight: 500;
-    transition: 0.3s;
+p {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: #64748b;
 }
 
-#container a:hover {
-    color: #ffffff;
+a {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #4338ca;
     text-decoration: underline;
 }
 
-/* ===============================
-   RESPONSIVE
-=================================*/
-@media (max-width: 500px) {
+/* Message Styling */
+.message {
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.message.success {
+    background: #dcfce7;
+    color: #15803d;
+    border-left: 3px solid #10b981;
+}
+
+.message.error {
+    background: #fee2e2;
+    color: #dc2626;
+    border-left: 3px solid #ef4444;
+}
+
+.message.info {
+    background: #dbeafe;
+    color: #1e40af;
+    border-left: 3px solid #3b82f6;
+}
+
+/* Error List (Django form errors) */
+.errorlist {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    list-style: none;
+    font-size: 12px;
+    border-left: 3px solid #ef4444;
+}
+
+.errorlist li {
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
     #container {
-        padding: 30px 25px;
+        padding: 28px 24px;
+    }
+    
+    #container h2 {
+        font-size: 24px;
+    }
+    
+    select,
+    input[type="text"],
+    input[type="password"],
+    button[type="submit"] {
+        padding: 10px 12px;
     }
 }

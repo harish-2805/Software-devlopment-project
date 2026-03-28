@@ -54,16 +54,18 @@
                 <div class="stat-label">Dept. Rank</div>
             </div>
         </div>
-        
         <div class="stat-card">
             <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
             <div class="stat-info">
                 <div class="stat-value {% if backlogs == 0 %}highlight-positive{% elif backlogs <= 2 %}highlight-warning{% else %}highlight-negative{% endif %}">
                     {{ backlogs }}
                 </div>
-                <div class="stat-label">Backlogs</div>
+                <div class="stat-label">Failed Subjects</div>
+                {% if active_backlogs > 0 %}
+                    <small style="font-size: 0.6rem; color: #f59e0b;">({{ active_backlogs }} active registrations)</small>
+                {% endif %}
             </div>
-        </div>
+</div>
     </div>
 
     <!-- Profile Details Card -->

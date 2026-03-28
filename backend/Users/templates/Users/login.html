@@ -3,17 +3,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - WBDDev</title>
-    <!-- Link your CSS in this way...in django-->
+    <title>Login - Academic Portal</title>
     <link rel="stylesheet" href="{% static 'users/login_page.css' %}">
+    <!-- Fallback: try absolute path if static tag fails -->
+    <link rel="stylesheet" href="/static/users/login_page.css">
 </head>
 <body>
     <div id="container">
         <h2>Login</h2>
-        <!-- Django form ....using url login on clicking subit it will tell that send this data to login view-->
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        
         <form action="{% url 'login' %}" method="POST">
             {% csrf_token %}
-            <!-- for security reason -->
+            
             <div>
                 <label for="role">Role:</label>
                 <select name="role" id="role" required>
@@ -40,7 +47,6 @@
 
         <div>
             <p>Don't have an account? <a href="{% url 'register' %}">Sign Up</a></p>
-            <!--to link it with register page -->
         </div>
     </div>
 </body>
