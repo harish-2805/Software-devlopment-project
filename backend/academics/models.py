@@ -3,6 +3,10 @@ from users.models import Student, Department, Faculty
 import math
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+# ─────────────────────────────────────────────
+# SUBJECT & ENROLLMENT MODELS (ONLY ONCE)
+# ─────────────────────────────────────────────
+
 class Subject(models.Model):
     name       = models.CharField(max_length=100)
     code       = models.CharField(max_length=10, unique=True)
@@ -10,7 +14,7 @@ class Subject(models.Model):
     faculty    = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True, blank=True)
     year       = models.IntegerField()
     semester   = models.IntegerField()
-    credits    = models.IntegerField(default=3)   # NEW — credits per subject
+    credits    = models.IntegerField(default=3)
 
     def __str__(self):
         return f"{self.name} ({self.code})"
@@ -28,7 +32,7 @@ class Enrollment(models.Model):
 
 
 # ─────────────────────────────────────────────
-# RELATIVE GRADING ENGINE
+# RELATIVE GRADING ENGINE (DEFINE ONLY ONCE)
 # ─────────────────────────────────────────────
 
 def round_half_down(value):
@@ -73,22 +77,21 @@ def assign_relative_grades(subject):
     """
     Main function — calculates and saves grades for ALL students in a subject.
     Called automatically when faculty submits marks for a subject.
-
-    Steps:
-    1. Collect all marks for this subject
-    2. Determine pass/fail for each student
-    3. For passed students with class > 10: relative grading using μ and σ
-    4. For class <= 10: all passed get P
-    5. Save grade back to each Marks record
     """
     all_marks = Marks.objects.filter(subject=subject).select_related('student')
+
+    print("Grading triggered")
 
     if not all_marks.exists():
         return
 
     # Collect raw marks lists for threshold calculation
     cam_list = [m.cam for m in all_marks]
-    ese_list = [m.ese for m in all_marks]
+    ese_list = [m.ese for m in all_marks if m.ese is not None]
+
+    # Ensure ese_list has values for threshold calculation
+    if not ese_list:
+        ese_list = [0] * len(all_marks)
 
     cam_threshold = calculate_pass_threshold_cam(cam_list)
     ese_threshold = calculate_pass_threshold_ese(ese_list)
@@ -96,7 +99,8 @@ def assign_relative_grades(subject):
     # Step 1: Separate passed and failed students
     passed_marks = []
     for m in all_marks:
-        if m.cam >= cam_threshold and m.ese >= ese_threshold:
+        ese_value = m.ese or 0
+        if m.cam >= cam_threshold and ese_value >= ese_threshold:
             passed_marks.append(m)
         else:
             m.grade        = 'F'
@@ -118,11 +122,13 @@ def assign_relative_grades(subject):
 
         for m in passed_marks:
             t = m.total
-            if   t >= mean + 2   * std_dev: grade = 'EX'
-            elif t >= mean + 1.5 * std_dev: grade = 'A'
-            elif t >= mean + 1   * std_dev: grade = 'B'
-            elif t >= mean + 0.5 * std_dev: grade = 'C'
-            elif t >= mean:                 grade = 'D'
+            if std_dev == 0:
+                grade = 'P'  
+            elif   t >= mean + 1.5   * std_dev: grade = 'EX'
+            elif t >= mean + 1 * std_dev: grade = 'A'
+            elif t >= mean :               grade = 'B'
+            elif t >= mean - 0.5 * std_dev: grade = 'C'
+            elif t >= mean - 1 *std_dev:    grade = 'D'
             else:                           grade = 'P'
 
             grade_point_map = {'EX': 10, 'A': 9, 'B': 8, 'C': 7, 'D': 6, 'P': 5}
@@ -136,6 +142,10 @@ def assign_relative_grades(subject):
             m.grade_points = 5
             m.save(update_fields=['grade', 'grade_points'])
 
+
+# ─────────────────────────────────────────────
+# SGPA / CGPA FUNCTIONS
+# ─────────────────────────────────────────────
 
 def calculate_sgpa(student, semester):
     """
@@ -193,177 +203,11 @@ def calculate_cgpa(student, up_to_semester):
 
     return round(total_weighted / total_credits, 2)
 
-from django.db import models
-from users.models import Student, Department, Faculty
-import math
-from django.core.validators import MinValueValidator, MaxValueValidator
-
-class Subject(models.Model):
-    name       = models.CharField(max_length=100)
-    code       = models.CharField(max_length=10, unique=True)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    faculty    = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True, blank=True)
-    year       = models.IntegerField()
-    semester   = models.IntegerField()
-    credits    = models.IntegerField(default=3)   # NEW — credits per subject
-
-    def __str__(self):
-        return f"{self.name} ({self.code})"
-
-
-class Enrollment(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.student} enrolled in {self.subject}"
-
-    class Meta:
-        unique_together = ('student', 'subject')
-
 
 # ─────────────────────────────────────────────
-# RELATIVE GRADING ENGINE
+# MARKS MODEL (ONLY ONCE)
 # ─────────────────────────────────────────────
 
-def round_half_down(value):
-    floor_val = math.floor(value)
-    if value - floor_val == 0.5:
-        return floor_val
-    return round(value)
-
-
-def calculate_pass_threshold_cam(cam_marks_list):
-    if not cam_marks_list:
-        return 0
-    highest = max(cam_marks_list)
-    return round_half_down(highest * 0.35)
-
-
-def calculate_pass_threshold_ese(ese_marks_list):
-    if not ese_marks_list:
-        return 0
-    highest    = max(ese_marks_list)
-    threshold1 = round_half_down(highest * 0.35)
-
-    avg        = sum(ese_marks_list) / len(ese_marks_list)
-    threshold2 = round_half_down(avg * 0.50)
-
-    return min(threshold1, threshold2)
-
-
-def assign_relative_grades(subject):
-    all_marks = Marks.objects.filter(subject=subject).select_related('student')
-
-    if not all_marks.exists():
-        return
-
-    cam_list = [m.cam for m in all_marks]
-    ese_list = [m.ese or 0 for m in all_marks]
-
-    cam_threshold = calculate_pass_threshold_cam(cam_list)
-    ese_threshold = calculate_pass_threshold_ese(ese_list)
-
-    passed_marks = []
-    for m in all_marks:
-        if m.cam >= cam_threshold and (m.ese or 0) >= ese_threshold:
-            passed_marks.append(m)
-        else:
-            m.grade = 'F'
-            m.grade_points = 0
-            m.save(update_fields=['grade', 'grade_points'])
-
-    if not passed_marks:
-        return
-
-    class_size = len(passed_marks)
-
-    if class_size > 10:
-        totals = [m.total for m in passed_marks]
-        mean = sum(totals) / len(totals)
-        variance = sum((t - mean) ** 2 for t in totals) / len(totals)
-        std_dev = math.sqrt(variance)
-
-        for m in passed_marks:
-            t = m.total
-
-            if   t >= mean + 2   * std_dev: grade = 'EX'
-            elif t >= mean + 1.5 * std_dev: grade = 'A'
-            elif t >= mean + 1   * std_dev: grade = 'B'
-            elif t >= mean + 0.5 * std_dev: grade = 'C'
-            elif t >= mean:                 grade = 'D'
-            else:                           grade = 'P'
-
-            gp = {'EX':10,'A':9,'B':8,'C':7,'D':6,'P':5}
-
-            m.grade = grade
-            m.grade_points = gp[grade]
-            m.save(update_fields=['grade', 'grade_points'])
-    else:
-        for m in passed_marks:
-            m.grade = 'P'
-            m.grade_points = 5
-            m.save(update_fields=['grade', 'grade_points'])
-
-
-# ─────────────────────────────────────────────
-# SGPA / CGPA (UNCHANGED)
-# ─────────────────────────────────────────────
-
-def calculate_sgpa(student, semester):
-
-    marks_qs = Marks.objects.filter(
-        student=student,
-        subject__semester=semester
-    ).select_related('subject')
-
-    if not marks_qs.exists():
-        return 0.0
-
-    total_credit_points = sum(
-        (m.grade_points or 0) * m.subject.credits
-        for m in marks_qs
-    )
-    total_credits = sum(m.subject.credits for m in marks_qs)
-
-    if total_credits == 0:
-        return 0.0
-
-    return round(total_credit_points / total_credits, 2)
-
-
-def calculate_cgpa(student, up_to_semester):
-
-    if up_to_semester < 2:
-        return 0.0
-
-    total_weighted = 0.0
-    total_credits  = 0
-
-    for sem in range(1, up_to_semester + 1):
-
-        sem_marks = Marks.objects.filter(
-            student=student,
-            subject__semester=sem
-        ).select_related('subject')
-
-        sem_credits = sum(m.subject.credits for m in sem_marks)
-        if sem_credits == 0:
-            continue
-
-        sgpa = calculate_sgpa(student, sem)
-        total_weighted += sgpa * sem_credits
-        total_credits  += sem_credits
-
-    if total_credits == 0:
-        return 0.0
-
-    return round(total_weighted / total_credits, 2)
-
-
-# ─────────────────────────────────────────────
-# MARKS MODEL (ENHANCED — LIVE RELATIVE SYSTEM)
-# ─────────────────────────────────────────────
 class Marks(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
@@ -415,7 +259,6 @@ class Marks(models.Model):
 
     @property
     def predicted_grade(self):
-
         all_marks = Marks.objects.filter(subject=self.subject)
         scores = [m.running_score for m in all_marks]
 
@@ -431,14 +274,14 @@ class Marks(models.Model):
         if std_dev == 0:
             return "P"
 
-        if   t >= mean + 2 * std_dev: return "EX"
-        elif t >= mean + 1.5 * std_dev: return "A"
-        elif t >= mean + 1 * std_dev: return "B"
-        elif t >= mean + 0.5 * std_dev: return "C"
-        elif t >= mean: return "D"
+        if   t >= mean + 1.5 * std_dev: return "EX"
+        elif t >= mean + 1 * std_dev: return "A"
+        elif t >= mean : return "B"
+        elif t >= mean - 0.5 * std_dev: return "C"
+        elif t >= mean - 1 * std_dev: return "D"
         else: return "P"
 
-    # ───────── MARKS NEEDED FOR NEXT GRADE (NEW FEATURE) ─────────
+    # ───────── MARKS NEEDED FOR NEXT GRADE ─────────
 
     @property
     def marks_needed_for_next_grade(self):
@@ -446,7 +289,6 @@ class Marks(models.Model):
         Shows additional marks needed to reach next higher grade.
         Works dynamically with relative grading.
         """
-
         all_marks = Marks.objects.filter(subject=self.subject)
         scores = [m.running_score for m in all_marks]
 
@@ -461,11 +303,11 @@ class Marks(models.Model):
 
         # Grade boundaries (LOW → HIGH)
         boundaries = [
-            ("D",  mean),
-            ("C",  mean + 0.5 * std_dev),
-            ("B",  mean + 1 * std_dev),
-            ("A",  mean + 1.5 * std_dev),
-            ("EX", mean + 2 * std_dev),
+            ("D",  mean - 1* std_dev),
+            ("C",  mean - 0.5 * std_dev),
+            ("B",  mean ),
+            ("A",  mean + 1 * std_dev),
+            ("EX", mean + 1.5 * std_dev),
         ]
 
         for grade, boundary in boundaries:
@@ -494,24 +336,25 @@ class Marks(models.Model):
 
     # ───────── AT RISK DETECTION ─────────
 
-# Add this property to your Marks class
     @property
     def is_at_risk(self):
         """At risk based on current grade - F, P, or D"""
         if self.grade in ['F', 'P', 'D']:
             return True
         return False
+    
     # ───────── SAVE ─────────
 
     def save(self, *args, **kwargs):
-
         # auto total calculation
         self.total = self.cam + (self.ese or 0)
-
+        
+        # Get update_fields before super().save()
+        update_fields = kwargs.get('update_fields')
+        
         super().save(*args, **kwargs)
 
-        # trigger grading engine
-        update_fields = kwargs.get('update_fields')
+        # trigger grading engine (only if not updating specific fields)
         if update_fields is None:
             assign_relative_grades(self.subject)
 
@@ -520,7 +363,8 @@ class Marks(models.Model):
 
     class Meta:
         unique_together = ('student', 'subject')
-        
+
+
 # ─────────────────────────────────────────────
 # ATTENDANCE MODEL
 # ─────────────────────────────────────────────
@@ -582,9 +426,11 @@ class Alumni(models.Model):
     class Meta:
         ordering = ['-batch_year']
 
+
 # ─────────────────────────────────────────────
 # BACKLOG MODEL
 # ─────────────────────────────────────────────
+
 class Backlog(models.Model):
     STATUS_CHOICES = [
         ('registered', 'Registered (Payment Pending)'),

@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'users',
     'student',
     'academics.apps.AcademicsConfig',
-    'faculty'
+    'faculty',
+    
 ]
 
 
